@@ -539,7 +539,86 @@ m2:Button({
     Icon = "x",
     Callback = function() pcall(function() Window:Destroy() end) end,
 })
+----------------------------------------------------------------
+-- Onglet Shaders + Protection (anti-fling)
+----------------------------------------------------------------
+local BASE = "https://raw.githubusercontent.com/lnothingltherel/MM2hub/refs/heads/main/"
+local okSh, Shaders = pcall(function()
+    return loadstring(game:HttpGet(BASE .. "shaders.lua"), "@Shaders")()
+end)
 
+local tabShaders = Window:CreateTab({ Name = "Shaders", Icon = "sparkles" })
+local shSec = tabShaders:CreateSection({ Name = "Ambiance visuelle" })
+
+if okSh and type(Shaders) == "table" then
+    local current = "Doux"
+    local enabled = false
+
+    shSec:Dropdown({
+        Name = "Preset",
+        Options = Shaders.Presets(),
+        Default = current,
+        Search = false,
+        Callback = function(v)
+            current = v
+            if enabled then Shaders.Apply(current) end
+        end,
+    })
+    shSec:Toggle({
+        Name = "Activer les shaders",
+        Callback = function(v)
+            enabled = v
+            if v then Shaders.Apply(current) else Shaders.Clear() end
+        end,
+    })
+    shSec:Button({
+        Name = "Retirer tous les effets",
+        Icon = "trash-2",
+        Callback = function()
+            enabled = false
+            Shaders.Clear()
+        end,
+    })
+    Window.Closed:Connect(function() pcall(Shaders.Clear) end)
+else
+    shSec:Label({ Name = "shaders.lua introuvable dans ton dépôt" })
+end
+
+local tabProtect = Window:CreateTab({ Name = "Protection", Icon = "shield" })
+local prSec = tabProtect:CreateSection({ Name = "Anti-fling" })
+
+local antiFling = false
+
+prSec:Toggle({
+    Name = "Anti-fling",
+    Callback = function(v) antiFling = v end,
+})
+prSec:Label({ Name = "Empêche les autres de te projeter dans les airs" })
+
+-- 1) les autres joueurs ne te touchent plus physiquement (chez toi)
+table.insert(connections, RunService.Stepped:Connect(function()
+    if not antiFling then return end
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character then
+            for _, part in ipairs(player.Character:GetDescendants()) do
+                if part:IsA("BasePart") then part.CanCollide = false end
+            end
+        end
+    end
+end))
+
+-- 2) si ta vitesse devient énorme (signe d'un fling), on la remet à zéro
+table.insert(connections, RunService.Heartbeat:Connect(function()
+    if not antiFling or state.fly then return end
+    local root = getRoot()
+    if root then
+        if root.AssemblyLinearVelocity.Magnitude > 250
+            or root.AssemblyAngularVelocity.Magnitude > 100 then
+            root.AssemblyLinearVelocity = Vector3.zero
+            root.AssemblyAngularVelocity = Vector3.zero
+        end
+    end
+end))
 Slate:Notify({
     Title = "MM2 Panel",
     Description = "Chargé. Shift droit pour afficher ou cacher.",
