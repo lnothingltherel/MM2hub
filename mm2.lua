@@ -1,1143 +1,945 @@
-if game.PlaceId == 142823291 then --Proofing just because ;)
---Note: Don't reset with godmode on or you will be stuck on a black screen for a reasonable amount of time
---Change to false if you dont like printing to console
-local printvar = true
---Change to true if you want to see names instead of murderer, sheriff, and innocents with esp
-local espnames = true
---Change keybinds to your liking
-local coinkey = "c" --Coin grabber keybind
-local MSkey = "m" --Murderer/Sheriff esp keybind
-local playerskey = "q" --All players esp keybind
-local espoffkey = "b" --Turn esp off keybind
-local flykey = "f" --Fly keybind
-local noclipkey = "r" --Noclip keybind
-local godmodekey = "g" --Godmode keybind
-local xrayonkey = "x" --Xray on keybind
-local xrayoffkey = "z" --Xray off keybind
-local bringgunkey = "t" --Teleport to gun keybind
-local hideshowguikey = "p" --Show/Hide gui keybind
---End of easy customization options
-
---Gui Buttons and Status--
-local MM2 = Instance.new("ScreenGui")
-local Main = Instance.new("Frame")
-local Title = Instance.new("TextLabel")
-local Coin = Instance.new("TextButton")
-local MSEsp = Instance.new("TextButton")
-local MSESPActive = Instance.new("TextLabel")
-local PlayersEsp = Instance.new("TextButton")
-local PlayersEspActive = Instance.new("TextLabel")
-local EspOff = Instance.new("TextButton")
-local EspOffActive = Instance.new("TextLabel")
-local Run = Instance.new("TextButton")
-local RunActiveGui = Instance.new("TextLabel")
-local Fly = Instance.new("TextButton")
-local FlyActive = Instance.new("TextLabel")
-local Noclip = Instance.new("TextButton")
-local NoclipActive = Instance.new("TextLabel")
-local GodMode = Instance.new("TextButton")
-local GodModeActive = Instance.new("TextLabel")
-local GuiXrayOn = Instance.new("TextButton")
-local GuiXrayOnActive = Instance.new("TextLabel")
-local GuiXrayOff = Instance.new("TextButton")
-local GuiXrayOffActive = Instance.new("TextLabel")
-local BringGun = Instance.new("TextButton")
-local Keybinds = Instance.new("TextButton")
-local KeybindsActive = Instance.new("TextLabel")
-local Hide = Instance.new("TextButton")
-local Show = Instance.new("TextButton")
-
---Other Variables
-local runActive = false
-local teamname = "None"
-local murderer = "None"
-local sheriff = "None"
-local player = game:GetService("Players").LocalPlayer
-
-local esp = false
-local plresp
-local track = false
-
-local NClip = false
-local char = game.Players.LocalPlayer.Character
-local obj = game.workspace
-local mouse=game.Players.LocalPlayer:GetMouse()
-local LP = game:GetService("Players").LocalPlayer
-local flyvar = false
-
-local showvar = true
-local inputcode = game:GetService("UserInputService")
-local godmodevar = false
-local keyOff = false
-local NClip = false
-
---Start of Gui--
-MM2.Name = "MM2"
-MM2.Parent = game.CoreGui
-MM2.ResetOnSpawn = false
-
-Main.Name = "Main"
-Main.Parent = MM2
-Main.BackgroundColor3 = Color3.new(0.188235, 0.188235, 0.188235)
-Main.BorderColor3 = Color3.new(0, 0.607843, 1)
-Main.BorderSizePixel = 5
-Main.Draggable = true
-Main.Position = UDim2.new(0.574999988, 0, 0.349999994, 0)
-Main.Size = UDim2.new(0.2, 0, 0.4, 0)
-Main.Visible = true
-Main.Active = true
-
-Title.Name = "Title"
-Title.Parent = Main
-Title.BackgroundColor3 = Color3.new(0.188235, 0.188235, 0.188235)
-Title.BorderColor3 = Color3.new(0, 0.607843, 1) 
-Title.BorderSizePixel = 5
-Title.Draggable = true
-Title.Size = UDim2.new(1.005, 0, 0.2, 0)
-Title.ZIndex = 3
-Title.Font = Enum.Font.SciFi
-Title.FontSize = Enum.FontSize.Size24
-Title.Text = "Murder Mystery 2"
-Title.TextColor3 = Color3.new(0, 0.607843, 1)
-Title.TextScaled = true
-Title.TextSize = 20
-Title.TextStrokeColor3 = Color3.new(0.129412, 0.54902, 1)
-Title.TextWrapped = true
-
---Start of functions for buttons--
-function Create(base, team, colors1, colors2, colors3, teamname) --For all esps
-	local bb = Instance.new("BillboardGui",player.PlayerGui)
-	bb.Adornee = base
-	bb.ExtentsOffset = Vector3.new(0,1,0)
-	bb.AlwaysOnTop = true
-	bb.Size = UDim2.new(0,5,0,5)
-	bb.StudsOffset = Vector3.new(0,1,0)
-	bb.Name = "tracker"
-	local frame = Instance.new("Frame",bb)
-	frame.ZIndex = 10
-	frame.BackgroundTransparency = 0.3
-	frame.Size = UDim2.new(1,0,1,0)
-	local txtlbl = Instance.new("TextLabel",bb)
-	txtlbl.ZIndex = 10
-	txtlbl.Text = teamname
-	txtlbl.BackgroundTransparency = 1
-	txtlbl.Position = UDim2.new(0,0,0,-35)
-	txtlbl.Size = UDim2.new(1,0,10,0)
-	txtlbl.Font = "ArialBold"
-	txtlbl.FontSize = "Size12"
-	txtlbl.TextStrokeTransparency = 0.5
-	if team then --For teams, left over from origianl but never removed
-		txtlbl.TextColor3 = Color3.new(0,0,255)
-		frame.BackgroundColor3 = Color3.new(0,0,255)
-	else
-		txtlbl.TextColor3 = Color3.new(colors1,colors2,colors3)
-		frame.BackgroundColor3 = Color3.new(colors1,colors2,colors3)
+--[[
+>info of this Mm2 Script<
+So this script make for testing and example for some function of part for beginner or even advanced,
+This is Open source Script is free to modify or edit and you guys don't need to give me credit for this work too even if you steal it or you are skid so I will anyway don't care
+___________
+I only learn Lua for 2-3 years and have some other knowledge like Luau, LuaJit, Lua FiveM and some other,
+forgot to say that I'm only just 15 year old
+___________
+This Mm2 Script is just a simple code and function and I don't have some ideas too so I only make just a simple function and thank you for use this open source script, Thanks for support <3
+-- https://github.com/Backlostunking/Open-Source/tree/main
+--> free webhooks script: https://github.com/Backlostunking/Open-Source/blob/main/Webhooks
+Enjoy using this open source script and my discord username: scriptermrbacon
+]]
+--[[
+ignore free Hidden properties
+-- on everywhere (I think):
+RobloxLocked,
+FindFirstDescendant, FindFirstAncestor, FindFirstAncestorOfClass, FindFirstAncestorWhichIsA
+-- on Player only (Not Service Players):
+SetAccountAge,
+GetNetworkPing,
+SetMembershipType,
+SimulationRadius,
+MaxSimulationRadius,
+MaximumSimulationRadius,
+SimulationRadiusChanged,
+AddReplicationFocus,
+AddReplicationFocusPosition,
+RemoveReplicationFocus,
+RemoveReplicationFocusPosition,
+ScriptSecurityError,
+Guest,
+IsFriendsWith, isFriendsWith, IsBestFriendsWith, GetFriendStatus, GetFriendsOnline, FriendStatusChanged, RemoteFriendRequestSignal, RequestFriendship, RevokeFriendship
+--DM me on discord if you need more
+]]
+--[[
+Free cloneref script project by ScripterMrbacon
+This for some advanced exploit who need this function for some executor that don't have function cloneref in environment (don't support cloneref function if say as understand)
+local cloneref = function(instance)
+	if typeof(instance) ~= "Instance" then return instance end
+	local proxy = newproxy(true)
+	local mt = getmetatable(proxy)
+	local function safeCall(func, ...)
+		local ok, result = pcall(func, ...)
+		return ok and result or nil
 	end
+	mt.__index = function(_, key)
+		local value = safeCall(function() return instance[key] end)
+		if typeof(value) == "function" then
+			return function(_, ...) return instance[key](instance, ...) end
+		end
+		return value
+	end
+	mt.__newindex = function(_, key, value)
+		safeCall(function() instance[key] = value end)
+	end
+	mt.__tostring = function()
+		return instance:GetFullName()
+	end
+	mt.__metatable = "cloneref_protected"
+	mt.__eq = function(_, other) return other == instance end
+	mt.__call = function(_, ...) return instance(...) end
+	return proxy
 end
+local Players = cloneref(game:GetService("Players"))
+print(Players)
+print(Players.LocalPlayer.Name) -- work even call a method/function or use method
+--Players.LocalPlayer:Kick() -- work
+--Players.LocalPlayer.Backpack:Destroy() -- Work on Child too and call a method/function to remove it as work like normal
+-- I hope you guys like this function that I make for 8 minutes
+]]
+-- free tutorial of Lua:
+--[[
+Example: Using the `do` keyword to create a block scope
 
-function findmurderer() --Find who the murderer is
-	local colors1 = 255
-	local colors2 = 0
-	local colors3 = 0
-	for i, v in pairs(game:GetService("Players"):GetChildren()) do
-		if v ~= game:GetService("Players").LocalPlayer then
-			for i,v in pairs(v.Backpack:GetChildren()) do --Checks backpack for knife
-				if v.Name == "Knife" then
-					if espnames == true then
-						local teamname = v.Parent.Parent.Name
-						if v.Parent.Parent.Character.Head ~= nil then
-							Create(v.Parent.Parent.Character.Head, false, colors1 ,colors2, colors3, teamname)
-						else
-							if printvar == true then
-								print("Head missing from murderer!")
-							end
-						end
-					elseif espnames == false then
-						local teamname = "Murderer"
-						if v.Parent.Parent.Character.Head ~= nil then
-							Create(v.Parent.Parent.Character.Head, false, colors1 ,colors2, colors3, teamname)
-						else
-							if printvar == true then
-								print("Head missing from murderer!")
-							end
-						end
-					end
-					murderer = v.Parent.Parent.Name
-					if printvar == true then
-						print(murderer.." is Murderer")
-					end
-				end
-			end
-			for i,v in pairs(v.Character:GetChildren()) do --Checks workspace player for knife (holding it)
-				if v.Name == "Knife" then
-					if espnames == true then
-						local teamname = v.Parent.Name
-						if v.Parent.Head ~= nil then --Tried to failproof to stop printing nil
-							Create(v.Parent.Head, false, colors1 ,colors2, colors3, teamname)
-						else
-							if printvar == true then
-								print("Head missing from murderer!")
-							end
-						end
-					elseif espnames == false then
-						local teamname = "Murderer"
-						if v.Parent.Head ~= nil then
-							Create(v.Parent.Head, false, colors1 ,colors2, colors3, teamname)
-						else
-							if printvar == true then
-								print("Head missing from murderer!")
-							end
-						end
-					end
-					murderer = v.Parent.Name
-					if printvar == true then --Tried to failproof to stop printing nil
-						local murderer1 = tostring(v.Parent.Name)
-						print(murderer1.." is Murderer")
-					end
-				end
+The `do` keyword starts a new block of code.  
+Any variables declared inside this block using `local`  
+will only exist inside that block.
+
+Example:
+do -- Start a new scope block
+	local variable = "string" -- This variable only exists inside here
+	print(variable) -- Output: "string"
+end -- End of block
+
+print(variable) -- Output: nil (variable is not accessible outside the block)
+]]
+--[[
+My Tip for chaining variables and conditions in Lua:
+
+Lua checks values **from left to right**, stopping at the first `false` or `nil`.
+This is useful for checking multiple conditions in one line:
+
+Example:
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local Root = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+print(Root) -- Output: HumanoidRootPart
+
+Explanation:
+1. Lua checks if `LocalPlayer.Character` exists.
+2. If it's not nil, it continues to `FindFirstChild("HumanoidRootPart")`.
+3. If both exist, it sets `Root` to the part.
+If any part of the chain is nil, the result will be nil (no error).
+]]
+--game:SetIsLoaded(true) > boolean true/false
+--game:Load() -- maybe make the game Load
+if not game:IsLoaded() then
+local s = pcall(function()
+game.Loaded:Wait()
+end)
+if not s then repeat task.wait() until game:IsLoaded() end
+end
+if game.PlaceId ~= 142823291 then return end -- only one game support ahh script
+local OrionLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/Backlostunking/ScriptLua/refs/heads/main/Orion-GB-V2.Lua"))()
+local executor = identifyexecutor and identifyexecutor() or getexecutorname and getexecutorname() or "Unknow"
+local GameName = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name
+local Window = OrionLib:MakeWindow({IntroText = "Script Made By ScripterMrbacon",IntroIcon = "rbxassetid://7733955511",Name = ("SourceHub • "..GameName.." ✓ Executor "..executor),IntroToggleIcon = "rbxassetid://4335489011",HidePremium = false,SaveConfig = false,IntroEnabled = true,ConfigFolder = "Mm2SHub"})
+local MainTab = Window:MakeTab({Name = "Main", Icon = "rbxassetid://4483345998", PremiumOnly = false})
+local PlayerTab = Window:MakeTab({Name = "Local", Icon = "rbxassetid://4335489011", PremiumOnly = false})
+local env = getgenv and getgenv() or getrenv and getrenv() or getfenv and getfenv(0) or _G
+local cloneref = cloneref or (function()
+local s, func = pcall(function()
+return loadstring(game:HttpGet("https://raw.githubusercontent.com/Backlostunking/Open-Source/refs/heads/main/cloneref-TheCloneVM"))()
+end)
+return s and func or function(s) return s end
+end)()
+local Players = cloneref(game:GetService("Players"))
+local ReplicatedStorage = cloneref(game:GetService("ReplicatedStorage"))
+local Tween = cloneref(game:GetService("TweenService"))
+local RunService = cloneref(game:GetService("RunService"))
+local Workspace = cloneref(game:GetService("Workspace"))
+local LocalPlayer = Players.LocalPlayer or Players:GetPropertyChangedSignal("LocalPlayer"):Wait() -- should clone this localplayer method if the game have anticlient modified
+local backpack = LocalPlayer:FindFirstChild("Backpack") or LocalPlayer:WaitForChild("Backpack")
+local Char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait() --and LocalPlayer.CharacterAppearanceLoaded:Wait()
+local Hum = Char and Char:FindFirstChildWhichIsA("Humanoid")
+local Root = (Hum and Hum.RootPart) or Char:FindFirstChild("HumanoidRootPart") or Char:FindFirstChild("Torso") or Char:FindFirstChild("UpperTorso")
+LocalPlayer.CharacterAdded:Connect(function()
+	repeat task.wait()
+	LocalPlayer = Players.LocalPlayer or Players:GetPropertyChangedSignal("LocalPlayer"):Wait()
+    backpack = LocalPlayer:FindFirstChild("Backpack") or LocalPlayer:WaitForChild("Backpack")
+    Char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+    Hum = Char and Char:FindFirstChildWhichIsA("Humanoid")
+    Root = (Hum and Hum.RootPart) or Char:FindFirstChild("HumanoidRootPart") or Char:FindFirstChild("Torso") or Char:FindFirstChild("UpperTorso")
+until LocalPlayer and backpack and Char and Hum and Root
+end)
+local function SHubFling(TargetPlayer)
+    if not (Char and Hum and Root) then return end
+    local TCharacter = TargetPlayer.Character
+    if not TCharacter then return end
+    local THumanoid = TCharacter:FindFirstChildOfClass("Humanoid")
+    local TRootPart = THumanoid and THumanoid.RootPart
+    local THead = TCharacter:FindFirstChild("Head")
+    local Accessory = TCharacter:FindFirstChildOfClass("Accessory")
+    local Handle = Accessory and Accessory:FindFirstChild("Handle")
+    env.OldPos = Root.CFrame
+     repeat task.wait()
+    Workspace.CurrentCamera.CameraSubject = THead or Handle or THumanoid
+     until Workspace.CurrentCamera.CameraSubject == THead or Handle or THumanoid
+    local function FPos(BasePart, Pos, Ang)
+        local targetCF = CFrame.new(BasePart.Position) * Pos * Ang
+        Root.CFrame = targetCF
+        Char:SetPrimaryPartCFrame(targetCF)
+        Root.Velocity = Vector3.new(9e7, 9e8, 9e7)
+        Root.RotVelocity = Vector3.new(9e8, 9e8, 9e8)
+    end
+    local function SFBasePart(BasePart)
+        local start = tick()
+        local angle = 0
+        env.timeout = env.timeout or 2.5
+        repeat
+            if Root and THumanoid then
+                angle += 100
+                for _, offset in ipairs{CFrame.new(0, 1.5, 0),CFrame.new(0, -1.5, 0),CFrame.new(2.25, 1.5, -2.25),CFrame.new(-2.25, -1.5, 2.25)} do
+                    FPos(BasePart, offset + THumanoid.MoveDirection, CFrame.Angles(math.rad(angle), 0, 0))
+                    task.wait()
+                end
+            end
+        until BasePart.Velocity.Magnitude > 500 or tick() - start > env.timeout
+    end
+    --Workspace.FallenPartsDestroyHeight = 1000
+    local BV = Instance.new("BodyVelocity")
+    BV.Name = "SeYyyVel!?"
+    BV.Velocity = Vector3.new(9e8, 9e8, 9e8)
+    BV.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+    BV.Parent = Root
+    Hum:SetStateEnabled(Enum.HumanoidStateType.Seated, false)
+    local target = TRootPart or THead or Handle
+    if target then SFBasePart(target) end
+    BV:Destroy()
+   Hum:SetStateEnabled(Enum.HumanoidStateType.Seated, true)
+   repeat task.wait()
+    Workspace.CurrentCamera.CameraSubject = Hum
+   until Workspace.CurrentCamera.CameraSubject == Hum
+    repeat
+        local cf = env.OldPos * CFrame.new(0, .5, 0)
+        Root.CFrame = cf
+        Char:SetPrimaryPartCFrame(cf)
+        Hum:ChangeState("GettingUp")
+        for _, part in ipairs(Char:GetChildren()) do
+            if part:IsA("BasePart") then
+                part.Velocity, part.RotVelocity = Vector3.zero, Vector3.zero
+            end
+        end
+        task.wait()
+    until (Root.Position - env.OldPos.p).Magnitude < 25
+end
+local function getRoles()
+    local data = ReplicatedStorage:FindFirstChild("GetPlayerData", true):InvokeServer()
+    local roles = {}
+    for plr, plrData in pairs(data) do
+         if not plrData.Dead then
+        roles[plr] = plrData.Role
+     end
+    end
+    return roles
+end
+MainTab:AddToggle({
+	Name = "Esp Player (Role&Name)",
+	Default = false,
+	Callback = function(Value)
+env.ESP_ENABLED = Value
+local updateLoop = nil
+local roleColors = {
+    Murderer = Color3.fromRGB(255, 0, 0),
+    Sheriff = Color3.fromRGB(0, 0, 255),
+    Hero = Color3.fromRGB(255, 255, 0),
+    Innocent = Color3.fromRGB(0, 255, 0),
+    Default = Color3.fromRGB(200, 200, 200)
+}
+local function clearESP()
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character then
+            local head = player.Character:FindFirstChild("Head")
+            if head then
+                local esp = head:FindFirstChild("RoleESP")
+                if esp then esp:Destroy() end
+            end
+            local hl = player.Character:FindFirstChild("RoleHighlight")
+            if hl then hl:Destroy() end
+        end
+    end
+end
+local function applyHighlight(character, role)
+    local existing = character:FindFirstChild("RoleHighlight")
+    if existing then existing:Destroy() end
+    local hl = Instance.new("Highlight")
+    hl.Name = "RoleHighlight"
+    hl.FillColor = roleColors[role] or roleColors.Default
+    hl.OutlineColor = Color3.new(1, 1, 1)
+    hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+    hl.FillTransparency = 0.4
+    hl.OutlineTransparency = 0
+    hl.Parent = character
+end
+local function createBillboard(head, role, playerName)
+    local esp = Instance.new("BillboardGui")
+    esp.Name = "RoleESP"
+    esp.Adornee = head
+    esp.Size = UDim2.new(5, 0, 5, 0)
+    esp.AlwaysOnTop = true
+    esp.Parent = head
+    local label = Instance.new("TextLabel")
+    label.Name = "RoleLabel"
+    label.Parent = esp
+    label.Size = UDim2.new(1, 0, 1, 0)
+    label.BackgroundTransparency = 1
+    label.TextStrokeTransparency = 0
+    label.TextSize = 14
+    label.TextColor3 = roleColors[role] or roleColors.Default
+    label.Font = Enum.Font.FredokaOne
+    label.Text = ("Role: %s • Name: %s"):format(role, playerName)
+-- Example: If you don't know what this means
+-- The () around the string allow us to immediately call a string method (like :format, :match, etc).
+-- It works the same as writing:
+-- string.format("Role: %s • Name: %s", role, playerName)
+-- But this version is cleaner and faster to type (I think)
+end
+local function updateESP()
+    local roles = getRoles()
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character then
+            local head = player.Character:FindFirstChild("Head")
+            if head then
+                local role = roles[player.Name] or "Default"
+                if not head:FindFirstChild("RoleESP") then
+                    createBillboard(head, role, player.Name)
+                else
+                    local label = head.RoleESP:FindFirstChild("RoleLabel")
+                    if label then
+                        label.Text = ("Role: %s • Name: %s"):format(role, player.Name)
+                        label.TextColor3 = roleColors[role] or roleColors.Default
+                    end
+                end
+              local light = player.Character:FindFirstChild("RoleHighlight")
+              if not light then
+                applyHighlight(player.Character, role)
+                 else
+                 light.FillColor = roleColors[role] or roleColors.Default
+                end
+            end
+        end
+    end
+end
+local function startESP()
+    if updateLoop then return end
+    updateLoop = task.spawn(function()
+        while env.ESP_ENABLED do
+            pcall(updateESP)
+            task.wait(0.25)
+        end
+        clearESP()
+        updateLoop = nil
+    end)
+end
+if Value then
+        startESP()
+    else
+        clearESP()
+    end
+end
+})
+MainTab:AddToggle({
+	Name = "Esp Gun",
+	Default = false,
+	Callback = function(Value)
+env.GunEsp = Value
+local gun = Workspace:FindFirstChild("GunDrop", true)
+if not env.GunEsp then
+if gun then
+if gun:FindFirstChild("GunHighlight") then
+gun:FindFirstChild("GunHighlight"):Destroy()
+end
+if gun:FindFirstChild("GunEsp") then
+gun:FindFirstChild("GunEsp"):Destroy()
+end
+end
+end
+while env.GunEsp do
+gun = Workspace:FindFirstChild("GunDrop", true)
+if gun then
+if not gun:FindFirstChild("GunHighlight") then
+    local gunh = Instance.new("Highlight", gun)
+    gunh.Name = "GunHighlight"
+    gunh.FillColor = Color3.new(1, 1, 0)
+    gunh.OutlineColor = Color3.new(1, 1, 1)
+    gunh.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+    gunh.FillTransparency = 0.4
+    gunh.OutlineTransparency = 0.5
+end
+    if not gun:FindFirstChild("GunEsp") then
+        local esp = Instance.new("BillboardGui")
+        esp.Name = "GunEsp"
+        esp.Adornee = gun
+        esp.Size = UDim2.new(5, 0, 5, 0)
+        esp.AlwaysOnTop = true
+        esp.Parent = gun
+        local text = Instance.new("TextLabel", esp)
+        text.Name = "GunLabel"
+        text.Size = UDim2.new(1, 0, 1, 0)
+        text.BackgroundTransparency = 1
+        text.TextStrokeTransparency = 0
+        text.TextColor3 = Color3.fromRGB(255, 255, 0)
+        text.Font = Enum.Font.FredokaOne
+        text.TextSize = 16
+        text.Text = "Gun Drop"
+    end
+end
+task.wait(0.1)
+end
+	end    
+})
+MainTab:AddButton({
+	Name = "Grab Gun",
+	Callback = function()
+if Char and Char ~= nil and Root then
+local gun = Workspace:FindFirstChild("GunDrop",true)
+if gun then
+if firetouchinterest then
+firetouchinterest(Root, gun, 0)
+firetouchinterest(Root, gun, 1)
+else
+gun.CFrame = Root.CFrame
+end
+end
+end
+  	end    
+})
+MainTab:AddToggle({
+	Name = "Auto Grab Gun",
+	Default = false,
+	Callback = function(Value)
+env.AGG = Value
+while env.AGG do
+if Char and Char ~= nil and Root then
+gun = Workspace:FindFirstChild("GunDrop",true)
+ if gun then
+if firetouchinterest then
+firetouchinterest(Root, gun, 0)
+firetouchinterest(Root, gun, 1)
+else
+gun.CFrame = Root.CFrame
+end
+end
+end
+task.wait(0.1)
+end
+	end    
+})
+MainTab:AddButton({
+	Name = "Steal Gun (From Sheriff&Hero)",
+	Callback = function()
+if Char and Char ~= nil and Hum and backpack then
+for _, p in pairs(Players:GetPlayers()) do
+if p ~= LocalPlayer then
+if p.Character and p.Character:FindFirstChild("Gun") then
+p.Character:FindFirstChild("Gun").Parent = Char
+Hum:EquipTool(Char:FindFirstChild("Gun"))
+Hum:UnequipTools()
+elseif p:FindFirstChild("Backpack") and p.Backpack:FindFirstChild("Gun") then
+p.Backpack:FindFirstChild("Gun").Parent = backpack
+Hum:EquipTool(backpack:FindFirstChild("Gun"))
+Hum:UnequipTools()
+end
+end
+end
+end
+  	end    
+})
+local function getMurdererTarget()
+local data = ReplicatedStorage:FindFirstChild("GetPlayerData", true):InvokeServer()
+for plr, plrData in pairs(data) do
+if plrData.Role == "Murderer" then
+local player = Players:FindFirstChild(plr)
+if player then
+if player == LocalPlayer then return nil, true end
+local char = player.Character
+if char then
+local hrp = char:FindFirstChild("HumanoidRootPart")
+if hrp then return hrp.Position, false end
+local head = char:FindFirstChild("Head")
+if head then return head.Position, false end
+end
+end
+end
+end
+return nil, false
+end
+MainTab:AddToggle({
+	Name = "Shoot Murder Button",
+	Default = false,
+	Callback = function(Value)
+local guip, CoreGui = nil, game:FindService("CoreGui")
+if gethui then
+guip = gethui()
+elseif CoreGui and CoreGui:FindFirstChild("RobloxGui") then
+guip = CoreGui.RobloxGui
+elseif CoreGui then
+guip = CoreGui
+else
+guip = LocalPlayer:FindFirstChild("PlayerGui")
+end
+ if Value then
+if not guip:FindFirstChild("GunW") then
+local GunGui = Instance.new("ScreenGui", guip)
+GunGui.Name = "GunW"
+local TextButton = Instance.new("TextButton", GunGui)
+TextButton.Draggable = true
+TextButton.Position = UDim2.new(0.5, 187, 0.5, -176)
+TextButton.Size = UDim2.new(0, 50, 0, 40)
+TextButton.TextStrokeTransparency = 0
+TextButton.BackgroundTransparency = 0.2
+TextButton.BackgroundColor3 = Color3.fromRGB(44, 44, 45)
+TextButton.BorderColor3 = Color3.new(1, 1, 1)
+TextButton.Text = "Shoot Murder"
+TextButton.TextColor3 = Color3.new(1, 1, 1)
+TextButton.TextSize = 8
+TextButton.Visible = true
+TextButton.AnchorPoint = Vector2.new(0.4, 0.2)
+TextButton.Active = true
+TextButton.TextWrapped = true
+local corner = Instance.new("UICorner", TextButton)
+local UIStroke = Instance.new("UIStroke", TextButton)
+UIStroke.Color = Color3.new(0, 0, 0)
+UIStroke.Thickness = 4
+UIStroke.Transparency = 0.4
+local UIAspectRatioConstraint = Instance.new("UIAspectRatioConstraint", TextButton)
+UIAspectRatioConstraint.AspectRatio = 1.5
+local UIGradient = Instance.new("UIGradient", TextButton)
+UIGradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.new(0.3, 0.3, 0.3)),ColorSequenceKeypoint.new(1, Color3.new(1, 1, 1))}
+    local function rotateGradient()
+    local tween = Tween:Create(UIGradient, TweenInfo.new(2, Enum.EasingStyle.Linear), {Rotation = UIGradient.Rotation + 360})
+    tween:Play()
+    tween.Completed:Connect(rotateGradient)
+end
+rotateGradient()
+TextButton.MouseButton1Click:Connect(function()
+if Char:FindFirstChild("Gun") then
+pcall(function()
+Char.Gun.KnifeLocal.CreateBeam.RemoteFunction:InvokeServer(1, (getMurdererTarget()), "AH2")
+end)
+end
+end)
+end
+else
+if guip:FindFirstChild("GunW") then
+guip:FindFirstChild("GunW"):Destroy()
+end
+end
+	end    
+})
+local function check()
+	local success, hookFunc = false, nil
+        if not getnamecallmethod or not checkcaller then return success end
+	local mt = getrawmetatable and getrawmetatable(game) or debug.getmetatable and debug.getmetatable(game)
+	local function handleNamecall(self, ...)
+		local method = getnamecallmethod and getnamecallmethod()
+		local args = {...}
+		if not checkcaller() then
+			if method == "InvokeServer" and tostring(self) == "RemoteFunction" and env.enabledGunBot then
+				return nil
 			end
 		end
+		return hookFunc(self, unpack(args))
 	end
+	if hookmetamethod and newcclosure then
+		hookFunc = hookmetamethod(game, "__namecall", newcclosure(handleNamecall))
+		success = true
+	elseif mt and setreadonly and newcclosure then
+		setreadonly(mt, false)
+		hookFunc = mt.__namecall
+		mt.__namecall = newcclosure(handleNamecall)
+		setreadonly(mt, true)
+		success = true
+	elseif hookmetamethod then
+		hookFunc = hookmetamethod(game, "__namecall", handleNamecall)
+		success = true
+	elseif mt and setreadonly then
+		setreadonly(mt, false)
+		hookFunc = mt.__namecall
+		mt.__namecall = handleNamecall
+		setreadonly(mt, true)
+		success = true
+	elseif mt and (makewriteable or make_writeable) then
+		(makewriteable or make_writeable)(mt)
+		hookFunc = mt.__namecall
+		mt.__namecall = handleNamecall
+		success = true
+	end
+	return success
 end
-	
-function findsheriff() --Find who the sheriff is
-	local colors1 = 0
-	local colors2 = 0
-	local colors3 = 255
-	for i, v in pairs(game:GetService("Players"):GetChildren()) do
-		if v ~= game:GetService("Players").LocalPlayer then
-			for i,v in pairs(v.Backpack:GetChildren()) do
-				if v.Name == "Revolver" or v.Name == "Gun" then --Lazy to check if its revolver or gun and checks backpack for gun
-					if espnames == true then
-						local teamname = v.Parent.Parent.Name
-						if v.Parent.Parent.Character.Head ~= nil then --Tried to failproof to stop printing nil
-							Create(v.Parent.Parent.Character.Head, false, colors1 ,colors2, colors3, teamname)
-						else
-							if printvar == true then
-								print("Head missing from sheriff!")
-							end
-						end
-					elseif espnames == false then
-						local teamname = "Sheriff"
-						if v.Parent.Parent.Character.Head ~= nil then --Tried to failproof to stop printing nil
-							Create(v.Parent.Parent.Character.Head, false, colors1 ,colors2, colors3, teamname)
-						else
-							if printvar == true then
-								print("Head missing from sheriff!")
-							end
-						end
-					end
-					sheriff = v.Parent.Parent.Name
-					if printvar == true then
-						local sheriff1 = tostring(v.Parent.Parent.Name)
-						print(sheriff1.." is Sheriff")
-					end
-				end
-			end
-			for i,v in pairs(v.Character:GetChildren()) do
-				if v.Name == "Revolver" or v.Name == "Gun" then --Lazy to check if its revolver or gun and checks workspace player for gun (holding it)
-					if espnames == true then
-						local teamname = v.Parent.Name
-						if v.Parent.Head ~= nil then --Tried to failproof to stop printing nil
-							Create(v.Parent.Head, false, colors1 ,colors2, colors3, teamname)
-						else
-							if printvar == true then
-								print("Head missing from sheriff!")
-							end
-						end
-					elseif espnames == false then
-						local teamname = "Sheriff"
-						if v.Parent.Head ~= nil then --Tried to failproof to stop printing nil
-							Create(v.Parent.Head, false, colors1 ,colors2, colors3, teamname)
-						else
-							if printvar == true then
-								print("Head missing from sheriff!")
-							end
-						end
-					end
-					sheriff = v.Parent.Name
-					if printvar == true then
-						local sheriff1 = tostring(v.Parent.Name)
-						print(sheriff1.." is Sheriff")
-					end
-				end
-			end
+local isUseHook = check()
+local AimbotMem = MainTab:AddToggle({
+	Name = "Gun Aimbot",
+	Default = false,
+	Callback = function(Value)
+if isUseHook then
+env.enabledGunBot = Value
+env.GunBotConnection = env.GunBotConnection or {}
+local function setupGunBot(character)
+	if not character then return end
+	local gun = character:FindFirstChild("Gun")
+	if not gun then
+		if env.GunBotConnection.Connection then
+			env.GunBotConnection.Connection:Disconnect()
+			env.GunBotConnection.Connection = nil
 		end
+		return
 	end
-end
-
-function findplayers() --Find all players but local player
-	findmurderer() --Finds murderer
-	findsheriff() --Finds sheriff
-	local colors1 = 0
-	local colors2 = 255
-	local colors3 = 0
-	for i, v in pairs(game:GetService("Players"):GetChildren()) do
-		if v ~= game:GetService("Players").LocalPlayer then --If not local player
-			if v.Name ~= murderer then --If not murderer
-				if v.Name ~= sheriff then --If not sheriff
-					if espnames == true then
-						local teamname = v.Name
-						if v.Character.Head ~= nil then --Tried to failproof to stop printing nil
-							Create(v.Character.Head, false, colors1 ,colors2, colors3, teamname)
-						else
-							if printvar == true then
-								print("Head missing from sheriff!")
-							end
-						end
-					elseif espnames == false then
-						local teamname = "Innocents"
-						if v.Parent.Head ~= nil then --Tried to failproof to stop printing nil
-							Create(v.Character.Head, false, colors1 ,colors2, colors3, teamname)
-						else
-							if printvar == true then
-								print("Head missing from sheriff!")
-							end
-						end
-					end
-				end
-			end
+	local knifeScript = gun:FindFirstChild("KnifeLocal")
+	local cb = knifeScript and knifeScript:FindFirstChild("CreateBeam")
+	local remote = cb and cb:FindFirstChild("RemoteFunction")
+	if not knifeScript or not cb or not remote then return end
+	if env.enabledGunBot then
+		if env.GunBotConnection.Connection then
+			env.GunBotConnection.Connection:Disconnect()
+			env.GunBotConnection.Connection = nil
 		end
-	end
-end
-
-function Clear() --Clears all the esps
-	for _,v in pairs(player.PlayerGui:children()) do
-		if v.Name == "tracker" and v:isA("BillboardGui") then
-			v:Destroy()
-		end
-	end
-end
-
-function XrayOn(obj) --Enables xray
-	for _,v in pairs(obj:GetChildren()) do 
-		if (v:IsA("BasePart")) and not v.Parent:FindFirstChild("Humanoid") then
-			v.LocalTransparencyModifier = 0.75
-		end
-	XrayOn(v) 
-	end
-end 
-
-function XrayOff(obj) --Disables xray
-	for _,v in pairs(obj:GetChildren()) do
-		if (v:IsA("BasePart")) and not v.Parent:FindFirstChild("Humanoid") then
-			v.LocalTransparencyModifier = 0
-		end XrayOff(v)
-	end
-end
-
-function sFLY() --Fly function
-	repeat wait() until LP and LP.Character and LP.Character:FindFirstChild('Torso') and LP.Character:FindFirstChild('Humanoid')
-	repeat wait() until mouse
-	
-	local T = LP.Character.Torso
-	local CONTROL = {F = 0, B = 0, L = 0, R = 0}
-	local lCONTROL = {F = 0, B = 0, L = 0, R = 0}
-	local SPEED = 0
-	
-	local function FLY()
-		FLYING = true
-		local BG = Instance.new('BodyGyro', T)
-		local BV = Instance.new('BodyVelocity', T)
-		BG.P = 9e4
-		BG.maxTorque = Vector3.new(9e9, 9e9, 9e9)
-		BG.cframe = T.CFrame
-		BV.velocity = Vector3.new(0, 0.1, 0)
-		BV.maxForce = Vector3.new(9e9, 9e9, 9e9)
-		spawn(function()
-			repeat wait()
-				LP.Character.Humanoid.PlatformStand = true
-				if CONTROL.L + CONTROL.R ~= 0 or CONTROL.F + CONTROL.B ~= 0 then
-					SPEED = 50
-				elseif not (CONTROL.L + CONTROL.R ~= 0 or CONTROL.F + CONTROL.B ~= 0) and SPEED ~= 0 then
-					SPEED = 0
-				end
-				if (CONTROL.L + CONTROL.R) ~= 0 or (CONTROL.F + CONTROL.B) ~= 0 then
-					BV.velocity = ((workspace.CurrentCamera.CoordinateFrame.lookVector * (CONTROL.F + CONTROL.B)) + ((workspace.CurrentCamera.CoordinateFrame * CFrame.new(CONTROL.L + CONTROL.R, (CONTROL.F + CONTROL.B) * 0.2, 0).p) - workspace.CurrentCamera.CoordinateFrame.p)) * SPEED
-					lCONTROL = {F = CONTROL.F, B = CONTROL.B, L = CONTROL.L, R = CONTROL.R}
-				elseif (CONTROL.L + CONTROL.R) == 0 and (CONTROL.F + CONTROL.B) == 0 and SPEED ~= 0 then
-					BV.velocity = ((workspace.CurrentCamera.CoordinateFrame.lookVector * (lCONTROL.F + lCONTROL.B)) + ((workspace.CurrentCamera.CoordinateFrame * CFrame.new(lCONTROL.L + lCONTROL.R, (lCONTROL.F + lCONTROL.B) * 0.2, 0).p) - workspace.CurrentCamera.CoordinateFrame.p)) * SPEED
-				else
-					BV.velocity = Vector3.new(0, 0.1, 0)
-				end
-				BG.cframe = workspace.CurrentCamera.CoordinateFrame
-			until not FLYING
-			CONTROL = {F = 0, B = 0, L = 0, R = 0}
-			lCONTROL = {F = 0, B = 0, L = 0, R = 0}
-			SPEED = 0
-			BG:destroy()
-			BV:destroy()
-			LP.Character.Humanoid.PlatformStand = false
+		env.GunBotConnection.Connection = gun.Activated:Connect(function()
+			local targetPos, isSelf = getMurdererTarget()
+			if not targetPos or isSelf or not remote then return end
+			remote:InvokeServer(1, targetPos, "AH2")
 		end)
-	end
-	
-	mouse.KeyDown:connect(function(KEY)
-		if KEY:lower() == 'w' then
-			CONTROL.F = 1
-		elseif KEY:lower() == 's' then
-			CONTROL.B = -1
-		elseif KEY:lower() == 'a' then
-			CONTROL.L = -1 
-		elseif KEY:lower() == 'd' then 
-			CONTROL.R = 1
-		end
-	end)
-	
-	mouse.KeyUp:connect(function(KEY)
-		if KEY:lower() == 'w' then
-			CONTROL.F = 0
-		elseif KEY:lower() == 's' then
-			CONTROL.B = 0
-		elseif KEY:lower() == 'a' then
-			CONTROL.L = 0
-		elseif KEY:lower() == 'd' then
-			CONTROL.R = 0
-		end
-	end)
-	FLY()
-end
-
-function NOFLY() --Unfly function
-	FLYING = false
-	LP.Character.Humanoid.PlatformStand = false
-end
-
-local noclipcoro = coroutine.wrap(function() --Noclip function
-	while true do
-		if NClip == true then
-			if game.Players ~= nil then
-				if game.Players.LocalPlayer ~= nil then
-					if game.Players.LocalPlayer.Character ~= nil then
-						if game.Players.LocalPlayer.Character:FindFirstChild("Torso") ~= nil then
-							if game.Players.LocalPlayer.Character:FindFirstChild("Head") ~= nil then
-								game.Players.LocalPlayer.Character.Torso.CanCollide = false
-								game.Players.LocalPlayer.Character.Head.CanCollide = false
-							end
-						end
-					end
-				end
-			end
-		end
-	game:service("RunService").Stepped:wait()
-	end
-end)
-
-noclipcoro() --For noclip to work
-
-game:GetService("Players").LocalPlayer.CharacterAdded:connect(function(character) --Resets specific things for ease
-	flyvar = false
-	FlyActive.Text = "Inactive"
-	FlyActive.TextColor3 = Color3.new(1, 0, 1)
-	godmodevar = false
-	GodModeActive.Text = "Inactive"
-	GodModeActive.TextColor3 = Color3.new(1, 0, 1)
-	Clear()
-	MSESPActive.Text = "Inactive"
-	MSESPActive.TextColor3 = Color3.new(1, 0, 1)
-	PlayersEspActive.Text = "Inactive"
-	PlayersEspActive.TextColor3 = Color3.new(1, 0, 1)
-	EspOffActive.Text = "Active"
-	EspOffActive.TextColor3 = Color3.new(0, 1, 0)
-end)
-
-mouse.KeyDown:connect(function(KeyDown) --If shift is held, run
-	if KeyDown == "0" and runActive == false and keyOff == false then
-		runActive = true
-		player.Character.Humanoid.WalkSpeed = 32
-		RunActiveGui.Text = "Active"
-		RunActiveGui.TextColor3 = Color3.new(0, 1, 0)
-	end
-end)
-
-mouse.KeyUp:connect(function(KeyUp) --If shift is released, walk
-	if KeyUp == "0" and runActive == true and keyOff == false then
-		runActive = false
-		player.Character.Humanoid.WalkSpeed = 16
-		RunActiveGui.Text = "Inactive"
-		RunActiveGui.TextColor3 = Color3.new(1, 0, 1)
-	end
-end)
-
-function coingrabberfunc() --Coin grabber function
-	local children = game.Workspace:GetChildren()
-	for _, child in pairs(children) do
-  		for _, child in pairs(child:GetChildren()) do
-       		table.insert(children, child)
-  		 end
-  		 if child:IsA("BasePart") and child.Name == "Coin" then
-         	child.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
-		end
-  	end
-end
-
-function godmodefunc() --Godmode function
-	local player = game.Players.LocalPlayer
-	if player.Character then
-		if player.Character:FindFirstChild("Humanoid") then
-			player.Character.Humanoid.Name = "1"
-		end
-		local l = player.Character["1"]:Clone()
-		l.Parent = player.Character
-		l.Name = "Humanoid"; wait(0.1)
-		player.Character["1"]:Destroy()
-		workspace.CurrentCamera.CameraSubject = player.Character.Humanoid
-		player.Character.Animate.Disabled = true; wait(0.1)
-		player.Character.Animate.Disabled = false
-	end
-end
-
---Coin Grabber--
-Coin.Name = "CoinGrabber"
-Coin.Parent = Main
-Coin.BackgroundColor3 = Color3.new(0.188235, 0.188235, 0.188235)
-Coin.BorderColor3 = Color3.new(0, 0.607843, 1)
-Coin.BorderSizePixel = 5
-Coin.Position = UDim2.new(0, 0, 0.215, 0)
-Coin.Size = UDim2.new(1.005, 0, 0.08, 0)
-Coin.ZIndex = 4
-Coin.Font = Enum.Font.SciFi
-Coin.FontSize = Enum.FontSize.Size24
-Coin.Text = "Coin Grabber ["..string.upper(coinkey).."]"
-Coin.TextColor3 = Color3.fromRGB(255, 255, 26)
-Coin.TextSize = 20
-Coin.TextWrapped = true
-Coin.MouseButton1Down:connect(function(x, y)
-	coingrabberfunc()
-end)
-
---Murderer/Sheriff Esp--
-MSESPActive.Name = "MSEspActive"
-MSESPActive.Parent = Main
-MSESPActive.BackgroundColor3 = Color3.new(0.188235, 0.188235, 0.188235)
-MSESPActive.BorderColor3 = Color3.new(0, 0.607843, 1)
-MSESPActive.BorderSizePixel = 5
-MSESPActive.Position = UDim2.new(0.755, 0, 0.315, 0)
-MSESPActive.Size = UDim2.new(0.25, 0, 0.08, 0)
-MSESPActive.ZIndex = 4
-MSESPActive.Font = Enum.Font.SciFi
-MSESPActive.FontSize = Enum.FontSize.Size24
-MSESPActive.Text = "Inactive"
-MSESPActive.TextColor3 = Color3.new(1, 0, 1)
-MSESPActive.TextSize = 20
-MSESPActive.TextWrapped = true
-
-MSEsp.Name = "MSEsp"
-MSEsp.Parent = Main
-MSEsp.BackgroundColor3 = Color3.new(0.188235, 0.188235, 0.188235)
-MSEsp.BorderColor3 = Color3.new(0, 0.607843, 1)
-MSEsp.BorderSizePixel = 5
-MSEsp.Position = UDim2.new(0, 0, 0.315, 0)
-MSEsp.Size = UDim2.new(0.75, 0, 0.08, 0)
-MSEsp.ZIndex = 4
-MSEsp.Font = Enum.Font.SciFi
-MSEsp.FontSize = Enum.FontSize.Size24
-MSEsp.Text = "Murderer/Sheriff Esp ["..string.upper(MSkey).."]"
-MSEsp.TextColor3 = Color3.fromRGB(255, 102, 255)
-MSEsp.TextSize = 20
-MSEsp.TextWrapped = true
-MSEsp.MouseButton1Down:connect(function(x, y)
-	murderer = "None"
-	sheriff = "None"
-	Clear()
-	findmurderer()
-	findsheriff()
-	if printvar == true then
-		print("Murderer/Sheriff")
-	end
-	MSESPActive.Text = "Active"
-	MSESPActive.TextColor3 = Color3.new(0, 1, 0)
-	PlayersEspActive.Text = "Inactive"
-	PlayersEspActive.TextColor3 = Color3.new(1, 0, 1)
-	EspOffActive.Text = "Inactive"
-	EspOffActive.TextColor3 = Color3.new(1, 0, 1)
-end)
-
---All Players Esp
-PlayersEspActive.Name = "PlayersEspActive"
-PlayersEspActive.Parent = Main
-PlayersEspActive.BackgroundColor3 = Color3.new(0.188235, 0.188235, 0.188235)
-PlayersEspActive.BorderColor3 = Color3.new(0, 0.607843, 1)
-PlayersEspActive.BorderSizePixel = 5
-PlayersEspActive.Position = UDim2.new(0.755, 0, 0.415, 0)
-PlayersEspActive.Size = UDim2.new(0.25, 0, 0.08, 0)
-PlayersEspActive.ZIndex = 4
-PlayersEspActive.Font = Enum.Font.SciFi
-PlayersEspActive.FontSize = Enum.FontSize.Size24
-PlayersEspActive.Text = "Inactive"
-PlayersEspActive.TextColor3 = Color3.new(1, 0, 1)
-PlayersEspActive.TextSize = 20
-PlayersEspActive.TextWrapped = true
-
-PlayersEsp.Name = "PlayersEsp"
-PlayersEsp.Parent = Main
-PlayersEsp.BackgroundColor3 = Color3.new(0.188235, 0.188235, 0.188235)
-PlayersEsp.BorderColor3 = Color3.new(0, 0.607843, 1)
-PlayersEsp.BorderSizePixel = 5
-PlayersEsp.Position = UDim2.new(0, 0, 0.415, 0)
-PlayersEsp.Size = UDim2.new(0.75, 0, 0.08, 0)
-PlayersEsp.ZIndex = 4
-PlayersEsp.Font = Enum.Font.SciFi
-PlayersEsp.FontSize = Enum.FontSize.Size24
-PlayersEsp.Text = "All Players Esp ["..string.upper(playerskey).."]"
-PlayersEsp.TextColor3 = Color3.fromRGB(102, 255, 51)
-PlayersEsp.TextSize = 20
-PlayersEsp.TextWrapped = true
-PlayersEsp.MouseButton1Down:connect(function(x, y)
-	Clear()
-	if printvar == true then
-		print("Players Esp")
-	end
-	MSESPActive.Text = "Inactive"
-	MSESPActive.TextColor3 = Color3.new(1, 0, 1)
-	PlayersEspActive.Text = "Active"
-	PlayersEspActive.TextColor3 = Color3.new(0, 1, 0)
-	EspOffActive.Text = "Inactive"
-	EspOffActive.TextColor3 = Color3.new(1, 0, 1)
-	findplayers()
-end)
-
---Esp Off
-EspOffActive.Name = "EspOffActive"
-EspOffActive.Parent = Main
-EspOffActive.BackgroundColor3 = Color3.new(0.188235, 0.188235, 0.188235)
-EspOffActive.BorderColor3 = Color3.new(0, 0.607843, 1)
-EspOffActive.BorderSizePixel = 5
-EspOffActive.Position = UDim2.new(0.755, 0, 0.515, 0)
-EspOffActive.Size = UDim2.new(0.25, 0, 0.08, 0)
-EspOffActive.ZIndex = 4
-EspOffActive.Font = Enum.Font.SciFi
-EspOffActive.FontSize = Enum.FontSize.Size24
-EspOffActive.Text = "Active"
-EspOffActive.TextColor3 = Color3.new(0, 1, 0)
-EspOffActive.TextSize = 20
-EspOffActive.TextWrapped = true
-
-EspOff.Name = "EspOff"
-EspOff.Parent = Main
-EspOff.BackgroundColor3 = Color3.new(0.188235, 0.188235, 0.188235)
-EspOff.BorderColor3 = Color3.new(0, 0.607843, 1)
-EspOff.BorderSizePixel = 5
-EspOff.Position = UDim2.new(0, 0, 0.515, 0)
-EspOff.Size = UDim2.new(0.75, 0, 0.08, 0)
-EspOff.ZIndex = 4
-EspOff.Font = Enum.Font.SciFi
-EspOff.FontSize = Enum.FontSize.Size24
-EspOff.Text = "Esp Off ["..string.upper(espoffkey).."]"
-EspOff.TextColor3 = Color3.fromRGB(255, 255, 255)
-EspOff.TextSize = 20
-EspOff.TextWrapped = true
-EspOff.MouseButton1Down:connect(function(x, y)
-	Clear()
-	if printvar == true then
-		print("Esp Off")
-	end
-	MSESPActive.Text = "Inactive"
-	MSESPActive.TextColor3 = Color3.new(1, 0, 1)
-	PlayersEspActive.Text = "Inactive"
-	PlayersEspActive.TextColor3 = Color3.new(1, 0, 1)
-	EspOffActive.Text = "Active"
-	EspOffActive.TextColor3 = Color3.new(0, 1, 0)
-end)
-
---Run
-RunActiveGui.Name = "RunActiveGui"
-RunActiveGui.Parent = Main
-RunActiveGui.BackgroundColor3 = Color3.new(0.188235, 0.188235, 0.188235)
-RunActiveGui.BorderColor3 = Color3.new(0, 0.607843, 1)
-RunActiveGui.BorderSizePixel = 5
-RunActiveGui.Position = UDim2.new(0.755, 0, 0.615, 0)
-RunActiveGui.Size = UDim2.new(0.25, 0, 0.08, 0)
-RunActiveGui.ZIndex = 4
-RunActiveGui.Font = Enum.Font.SciFi
-RunActiveGui.FontSize = Enum.FontSize.Size24
-RunActiveGui.Text = "Inactive"
-RunActiveGui.TextColor3 = Color3.new(1, 0, 1)
-RunActiveGui.TextSize = 20
-RunActiveGui.TextWrapped = true
-
-Run.Name = "Run"
-Run.Parent = Main
-Run.BackgroundColor3 = Color3.new(0.188235, 0.188235, 0.188235)
-Run.BorderColor3 = Color3.new(0, 0.607843, 1)
-Run.BorderSizePixel = 5
-Run.Position = UDim2.new(0, 0, 0.615, 0)
-Run.Size = UDim2.new(0.75, 0, 0.08, 0)
-Run.ZIndex = 4
-Run.Font = Enum.Font.SciFi
-Run.FontSize = Enum.FontSize.Size24
-Run.Text = "Run [Shift]"
-Run.TextColor3 = Color3.fromRGB(255, 51, 0)
-Run.TextSize = 20
-Run.TextWrapped = true
-Run.MouseButton1Down:connect(function(x, y)
-	if runActive == false then
-		runActive = true
-		player.Character.Humanoid.WalkSpeed = 32
-		RunActiveGui.Text = "Active"
-		RunActiveGui.TextColor3 = Color3.new(0, 1, 0)
-	elseif runActive == true then
-		runActive = false
-		player.Character.Humanoid.WalkSpeed = 16
-		RunActiveGui.Text = "Inactive"
-		RunActiveGui.TextColor3 = Color3.new(1, 0, 1)
-	end
-end)
-
---Fly
-FlyActive.Name = "FlyActive"
-FlyActive.Parent = Main
-FlyActive.BackgroundColor3 = Color3.new(0.188235, 0.188235, 0.188235)
-FlyActive.BorderColor3 = Color3.new(0, 0.607843, 1)
-FlyActive.BorderSizePixel = 5
-FlyActive.Position = UDim2.new(0.755, 0, 0.715, 0)
-FlyActive.Size = UDim2.new(0.25, 0, 0.08, 0)
-FlyActive.ZIndex = 4
-FlyActive.Font = Enum.Font.SciFi
-FlyActive.FontSize = Enum.FontSize.Size24
-FlyActive.Text = "Inactive"
-FlyActive.TextColor3 = Color3.new(1, 0, 1)
-FlyActive.TextSize = 20
-FlyActive.TextWrapped = true
-
-Fly.Name = "Fly"
-Fly.Parent = Main
-Fly.BackgroundColor3 = Color3.new(0.188235, 0.188235, 0.188235)
-Fly.BorderColor3 = Color3.new(0, 0.607843, 1)
-Fly.BorderSizePixel = 5
-Fly.Position = UDim2.new(0, 0, 0.715, 0)
-Fly.Size = UDim2.new(0.75, 0, 0.08, 0)
-Fly.ZIndex = 4
-Fly.Font = Enum.Font.SciFi
-Fly.FontSize = Enum.FontSize.Size24
-Fly.Text = "Fly ["..string.upper(flykey).."]"
-Fly.TextColor3 = Color3.fromRGB(204, 255, 255)
-Fly.TextSize = 20
-Fly.TextWrapped = true
-Fly.MouseButton1Down:connect(function(x, y)
-	if flyvar == false then
-		sFLY()
-		flyvar = true
-		FlyActive.Text = "Active"
-		FlyActive.TextColor3 = Color3.new(0, 1, 0)
-	elseif flyvar == true then
-		flyvar = false
-		NOFLY()
-		FlyActive.Text = "Inactive"
-		FlyActive.TextColor3 = Color3.new(1, 0, 1)
-	end
-end)
-
---Noclip
-NoclipActive.Name = "NoclipActive"
-NoclipActive.Parent = Main
-NoclipActive.BackgroundColor3 = Color3.new(0.188235, 0.188235, 0.188235)
-NoclipActive.BorderColor3 = Color3.new(0, 0.607843, 1)
-NoclipActive.BorderSizePixel = 5
-NoclipActive.Position = UDim2.new(0.755, 0, 0.815, 0)
-NoclipActive.Size = UDim2.new(0.25, 0, 0.08, 0)
-NoclipActive.ZIndex = 4
-NoclipActive.Font = Enum.Font.SciFi
-NoclipActive.FontSize = Enum.FontSize.Size24
-NoclipActive.Text = "Inactive"
-NoclipActive.TextColor3 = Color3.new(1, 0, 1)
-NoclipActive.TextSize = 20
-NoclipActive.TextWrapped = true
-
-Noclip.Name = "Noclip"
-Noclip.Parent = Main
-Noclip.BackgroundColor3 = Color3.new(0.188235, 0.188235, 0.188235)
-Noclip.BorderColor3 = Color3.new(0, 0.607843, 1)
-Noclip.BorderSizePixel = 5
-Noclip.Position = UDim2.new(0, 0, 0.815, 0)
-Noclip.Size = UDim2.new(0.75, 0, 0.08, 0)
-Noclip.ZIndex = 4
-Noclip.Font = Enum.Font.SciFi
-Noclip.FontSize = Enum.FontSize.Size24
-Noclip.Text = "Noclip ["..string.upper(noclipkey).."]"
-Noclip.TextColor3 = Color3.fromRGB(0, 102, 255)
-Noclip.TextSize = 20
-Noclip.TextWrapped = true
-Noclip.MouseButton1Down:connect(function(x, y)
-	if NClip == false then
-		NClip = true
-		if printvar == true then
-			print("Noclip Enabled")
-		end
-		NoclipActive.Text = "Active"
-		NoclipActive.TextColor3 = Color3.new(0, 1, 0)
-	elseif NClip == true then
-		NClip = false
-		if printvar == true then
-			print("Noclip Disabled")
-		end
-		NoclipActive.Text = "Inactive"
-		NoclipActive.TextColor3 = Color3.new(1, 0, 1)
-	end
-end)
-
---GodMode
-GodModeActive.Name = "GodModeActive"
-GodModeActive.Parent = Main
-GodModeActive.BackgroundColor3 = Color3.new(0.188235, 0.188235, 0.188235)
-GodModeActive.BorderColor3 = Color3.new(0, 0.607843, 1)
-GodModeActive.BorderSizePixel = 5
-GodModeActive.Position = UDim2.new(0.755, 0, 0.915, 0)
-GodModeActive.Size = UDim2.new(0.25, 0, 0.08, 0)
-GodModeActive.ZIndex = 4
-GodModeActive.Font = Enum.Font.SciFi
-GodModeActive.FontSize = Enum.FontSize.Size24
-GodModeActive.Text = "Inactive"
-GodModeActive.TextColor3 = Color3.new(1, 0, 1)
-GodModeActive.TextSize = 20
-GodModeActive.TextWrapped = true
-
-GodMode.Name = "GodMode"
-GodMode.Parent = Main
-GodMode.BackgroundColor3 = Color3.new(0.188235, 0.188235, 0.188235)
-GodMode.BorderColor3 = Color3.new(0, 0.607843, 1)
-GodMode.BorderSizePixel = 5
-GodMode.Position = UDim2.new(0, 0, 0.915, 0)
-GodMode.Size = UDim2.new(0.75, 0, 0.08, 0)
-GodMode.ZIndex = 4
-GodMode.Font = Enum.Font.SciFi
-GodMode.FontSize = Enum.FontSize.Size24
-GodMode.Text = "God Mode ["..string.upper(godmodekey).."]"
-GodMode.TextColor3 = Color3.fromRGB(255, 255, 255)
-GodMode.TextSize = 20
-GodMode.TextWrapped = true
-GodMode.MouseButton1Down:connect(function(x, y)
-	if godmodevar == false then
-		GodModeActive.Text = "Active"
-		GodModeActive.TextColor3 = Color3.new(0, 1, 0)
-		godmodevar = true
-		godmodefunc()
-	end
-end)
-
---Xray On
-GuiXrayOnActive.Name = "GuiXrayOnActive"
-GuiXrayOnActive.Parent = Main
-GuiXrayOnActive.BackgroundColor3 = Color3.new(0.188235, 0.188235, 0.188235)
-GuiXrayOnActive.BorderColor3 = Color3.new(0, 0.607843, 1)
-GuiXrayOnActive.BorderSizePixel = 5
-GuiXrayOnActive.Position = UDim2.new(0.755, 0, 1.015, 0)
-GuiXrayOnActive.Size = UDim2.new(0.25, 0, 0.08, 0)
-GuiXrayOnActive.ZIndex = 4
-GuiXrayOnActive.Font = Enum.Font.SciFi
-GuiXrayOnActive.FontSize = Enum.FontSize.Size24
-GuiXrayOnActive.Text = "Inactive"
-GuiXrayOnActive.TextColor3 = Color3.new(1, 0, 1)
-GuiXrayOnActive.TextSize = 20
-GuiXrayOnActive.TextWrapped = true
-
-GuiXrayOn.Name = "XrayOn"
-GuiXrayOn.Parent = Main
-GuiXrayOn.BackgroundColor3 = Color3.new(0.188235, 0.188235, 0.188235)
-GuiXrayOn.BorderColor3 = Color3.new(0, 0.607843, 1)
-GuiXrayOn.BorderSizePixel = 5
-GuiXrayOn.Position = UDim2.new(0, 0, 1.015, 0)
-GuiXrayOn.Size = UDim2.new(0.75, 0, 0.08, 0)
-GuiXrayOn.ZIndex = 4
-GuiXrayOn.Font = Enum.Font.SciFi
-GuiXrayOn.FontSize = Enum.FontSize.Size24
-GuiXrayOn.Text = "Xray On ["..string.upper(xrayonkey).."]"
-GuiXrayOn.TextColor3 = Color3.fromRGB(255, 204, 102)
-GuiXrayOn.TextSize = 20
-GuiXrayOn.TextWrapped = true
-GuiXrayOn.MouseButton1Down:connect(function(x, y)
-	GuiXrayOnActive.Text = "Active"
-	GuiXrayOnActive.TextColor3 = Color3.new(0, 1, 0)
-	GuiXrayOffActive.Text = "Inactive"
-	GuiXrayOffActive.TextColor3 = Color3.new(1, 0, 1)
-	XrayOn(obj)
-end)
-
---Xray Off
-GuiXrayOffActive.Name = "GuiXrayOffActive"
-GuiXrayOffActive.Parent = Main
-GuiXrayOffActive.BackgroundColor3 = Color3.new(0.188235, 0.188235, 0.188235)
-GuiXrayOffActive.BorderColor3 = Color3.new(0, 0.607843, 1)
-GuiXrayOffActive.BorderSizePixel = 5
-GuiXrayOffActive.Position = UDim2.new(0.755, 0, 1.115, 0)
-GuiXrayOffActive.Size = UDim2.new(0.25, 0, 0.08, 0)
-GuiXrayOffActive.ZIndex = 4
-GuiXrayOffActive.Font = Enum.Font.SciFi
-GuiXrayOffActive.FontSize = Enum.FontSize.Size24
-GuiXrayOffActive.Text = "Active"
-GuiXrayOffActive.TextColor3 = Color3.new(0, 1, 0)
-GuiXrayOffActive.TextSize = 20
-GuiXrayOffActive.TextWrapped = true
-
-GuiXrayOff.Name = "XrayOff"
-GuiXrayOff.Parent = Main
-GuiXrayOff.BackgroundColor3 = Color3.new(0.188235, 0.188235, 0.188235)
-GuiXrayOff.BorderColor3 = Color3.new(0, 0.607843, 1)
-GuiXrayOff.BorderSizePixel = 5
-GuiXrayOff.Position = UDim2.new(0, 0, 1.115, 0)
-GuiXrayOff.Size = UDim2.new(0.75, 0, 0.08, 0)
-GuiXrayOff.ZIndex = 4
-GuiXrayOff.Font = Enum.Font.SciFi
-GuiXrayOff.FontSize = Enum.FontSize.Size24
-GuiXrayOff.Text = "Xray Off ["..string.upper(xrayoffkey).."]"
-GuiXrayOff.TextColor3 = Color3.fromRGB(255, 153, 51)
-GuiXrayOff.TextSize = 20
-GuiXrayOff.TextWrapped = true
-GuiXrayOff.MouseButton1Down:connect(function(x, y)
-	GuiXrayOnActive.Text = "Inactive"
-	GuiXrayOnActive.TextColor3 = Color3.new(1, 0, 1)
-	GuiXrayOffActive.Text = "Active"
-	GuiXrayOffActive.TextColor3 = Color3.new(0, 1, 0)
-	XrayOff(obj)
-end)
-
---Bring Gun to You
-BringGun.Name = "BringGun"
-BringGun.Parent = Main
-BringGun.BackgroundColor3 = Color3.new(0.188235, 0.188235, 0.188235)
-BringGun.BorderColor3 = Color3.new(0, 0.607843, 1)
-BringGun.BorderSizePixel = 5
-BringGun.Position = UDim2.new(0, 0, 1.215, 0)
-BringGun.Size = UDim2.new(1.005, 0, 0.08, 0)
-BringGun.ZIndex = 4
-BringGun.Font = Enum.Font.SciFi
-BringGun.FontSize = Enum.FontSize.Size24
-BringGun.Text = "Teleport Gun ["..string.upper(bringgunkey).."]"
-BringGun.TextColor3 = Color3.fromRGB(0, 255, 0)
-BringGun.TextSize = 20
-BringGun.TextWrapped = true
-BringGun.MouseButton1Down:connect(function(x, y)
-	if game.Workspace.GunDrop.CFrame ~= nil then
-		game.Workspace.GunDrop.CFrame = game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame
 	else
-		if printvar == true then
-			print("Gun not currently dropped")
+		if env.GunBotConnection.Connection then
+			env.GunBotConnection.Connection:Disconnect()
+			env.GunBotConnection.Connection = nil
 		end
 	end
-end)
-
---Keybinds
-KeybindsActive.Name = "KeybindsActive"
-KeybindsActive.Parent = Main
-KeybindsActive.BackgroundColor3 = Color3.new(0.188235, 0.188235, 0.188235)
-KeybindsActive.BorderColor3 = Color3.new(0, 0.607843, 1)
-KeybindsActive.BorderSizePixel = 5
-KeybindsActive.Position = UDim2.new(0.755, 0, 1.315, 0)
-KeybindsActive.Size = UDim2.new(0.25, 0, 0.08, 0)
-KeybindsActive.ZIndex = 4
-KeybindsActive.Font = Enum.Font.SciFi
-KeybindsActive.FontSize = Enum.FontSize.Size24
-KeybindsActive.Text = "Active"
-KeybindsActive.TextColor3 = Color3.new(0, 1, 0)
-KeybindsActive.TextSize = 20
-KeybindsActive.TextWrapped = true
-
-Keybinds.Name = "Keybinds"
-Keybinds.Parent = Main
-Keybinds.BackgroundColor3 = Color3.new(0.188235, 0.188235, 0.188235)
-Keybinds.BorderColor3 = Color3.new(0, 0.607843, 1)
-Keybinds.BorderSizePixel = 5
-Keybinds.Position = UDim2.new(0, 0, 1.315, 0)
-Keybinds.Size = UDim2.new(0.75, 0, 0.08, 0)
-Keybinds.ZIndex = 4
-Keybinds.Font = Enum.Font.SciFi
-Keybinds.FontSize = Enum.FontSize.Size24
-Keybinds.Text = "Keybinds [Ctrl]"
-Keybinds.TextColor3 = Color3.fromRGB(255, 255, 255)
-Keybinds.TextSize = 20
-Keybinds.TextWrapped = true
-Keybinds.MouseButton1Down:connect(function(x, y)
-	if keyOff == true then
-		keyOff = false
-		KeybindsActive.Text = "Active"
-		KeybindsActive.TextColor3 = Color3.new(0, 1, 0)
-	elseif keyOff == false then
-		keyOff = true
-		KeybindsActive.Text = "Inactive"
-		KeybindsActive.TextColor3 = Color3.new(1, 0, 1)
-	end
-end)
-
-Show.Name = "Show"
-Show.Parent = MM2
-Show.BackgroundColor3 = Color3.new(0.188235, 0.188235, 0.188235)
-Show.BorderColor3 = Color3.new(0, 0.607843, 1)
-Show.BorderSizePixel = 5
-Show.Position = UDim2.new(0, 0, 0.85799998, 0)
-Show.Size = UDim2.new(0.08, 0, 0.04, 0)
-Show.ZIndex = 4
-Show.Font = Enum.Font.SciFi
-Show.FontSize = Enum.FontSize.Size24
-Show.Text = "Show ["..string.upper(hideshowguikey).."]"
-Show.TextColor3 = Color3.new(0, 0.333333, 1)
-Show.TextSize = 20
-Show.TextWrapped = true
-Show.Visible = false
-
-Hide.Name = "Hide"
-Hide.Parent = Main
-Hide.BackgroundColor3 = Color3.new(0.188235, 0.188235, 0.188235)
-Hide.BorderColor3 = Color3.new(0, 0.607843, 1)
-Hide.BorderSizePixel = 5
-Hide.Position = UDim2.new(0, 0, 1.415, 0)
-Hide.Size = UDim2.new(1.005, 0, 0.08, 0)
-Hide.ZIndex = 4
-Hide.Font = Enum.Font.SciFi
-Hide.FontSize = Enum.FontSize.Size24
-Hide.Text = "Hide ["..string.upper(hideshowguikey).."]"
-Hide.TextColor3 = Color3.new(0, 0.333333, 1)
-Hide.TextSize = 20
-Hide.TextWrapped = true
-
-Hide.MouseButton1Down:connect(function(x, y)
-	if showvar == true then
-		showvar = false
-		Main.Visible = false
-		Show.Visible = true
-		if printvar == true then
-			print("Hidden")
-		end
-	end
-end)
-
-Show.MouseButton1Down:connect(function(x, y)
-	if showvar == false then
-		showvar = true
-		Show.Visible = false
-		Main.Visible = true
-		if printvar == true then
-			print("Shown")
-		end
-	end
-end)
-
-inputcode.InputBegan:connect(function(input)
-	if input.KeyCode == Enum.KeyCode.LeftControl then
-		if keyOff == true then
-			keyOff = false
-			KeybindsActive.Text = "Active"
-			KeybindsActive.TextColor3 = Color3.new(0, 1, 0)
-		elseif keyOff == false then
-			keyOff = true
-			KeybindsActive.Text = "Inactive"
-			KeybindsActive.TextColor3 = Color3.new(1, 0, 1)
-		end
-	end
-end)
-
-mouse.keyDown:connect(function(key)
-	if keyOff == false then
-		if key == coinkey then --Coin Grabber
-			coingrabberfunc()
-		elseif key == MSkey then --Murderer/Sheriff Esp On
-			murderer = "None"
-			sheriff = "None"
-			Clear()
-			findmurderer()
-			findsheriff()
-			if printvar == true then
-				print("Murderer/Sheriff")
-			end
-			MSESPActive.Text = "Active"
-			MSESPActive.TextColor3 = Color3.new(0, 1, 0)
-			PlayersEspActive.Text = "Inactive"
-			PlayersEspActive.TextColor3 = Color3.new(1, 0, 1)
-			EspOffActive.Text = "Inactive"
-			EspOffActive.TextColor3 = Color3.new(1, 0, 1)
-		elseif key == playerskey then --Player Esp On
-			Clear()
-			MSESPActive.Text = "Inactive"
-			MSESPActive.TextColor3 = Color3.new(1, 0, 1)
-			PlayersEspActive.Text = "Active"
-			PlayersEspActive.TextColor3 = Color3.new(0, 1, 0)
-			EspOffActive.Text = "Inactive"
-			EspOffActive.TextColor3 = Color3.new(1, 0, 1)
-			findplayers()
-			if printvar == true then
-				print("Players")
-			end
-		elseif key == espoffkey then --Esp off
-			Clear()
-			if printvar == true then
-				print("Esp Disabled")
-			end
-			MSESPActive.Text = "Inactive"
-			MSESPActive.TextColor3 = Color3.new(1, 0, 1)
-			PlayersEspActive.Text = "Inactive"
-			PlayersEspActive.TextColor3 = Color3.new(1, 0, 1)
-			EspOffActive.Text = "Active"
-			EspOffActive.TextColor3 = Color3.new(0, 1, 0)
-		elseif key == flykey then --Fly
-			if flyvar == false then
-				sFLY()
-				flyvar = true
-				FlyActive.Text = "Active"
-				FlyActive.TextColor3 = Color3.new(0, 1, 0)
-			elseif flyvar == true then
-				flyvar = false
-				NOFLY()
-				FlyActive.Text = "Inactive"
-				FlyActive.TextColor3 = Color3.new(1, 0, 1)
-			end
-		elseif key == noclipkey then --Noclip toggle
-			if NClip == false then
-				NClip = true
-				if printvar == true then
-					print("Noclip Enabled")
-				end
-				NoclipActive.Text = "Active"
-				NoclipActive.TextColor3 = Color3.new(0, 1, 0)
-			elseif NClip == true then
-				NClip = false
-				if printvar == true then
-					print("Noclip Disabled")
-				end
-				NoclipActive.Text = "Inactive"
-				NoclipActive.TextColor3 = Color3.new(1, 0, 1)
-			end
-		elseif key == godmodekey then --Godmode
-			if godmodevar == false then
-				godmodevar = true
-				godmodefunc()
-				GodModeActive.Text = "Active"
-				GodModeActive.TextColor3 = Color3.new(0, 1, 0)
-			end
-		elseif key == xrayonkey then --Xray On
-			GuiXrayOnActive.Text = "Active"
-			GuiXrayOnActive.TextColor3 = Color3.new(0, 1, 0)
-			GuiXrayOffActive.Text = "Inactive"
-			GuiXrayOffActive.TextColor3 = Color3.new(1, 0, 1)
-			XrayOn(obj)
-		elseif key == xrayoffkey then --Xray Off
-			GuiXrayOnActive.Text = "Inactive"
-			GuiXrayOnActive.TextColor3 = Color3.new(1, 0, 1)
-			GuiXrayOffActive.Text = "Active"
-			GuiXrayOffActive.TextColor3 = Color3.new(0, 1, 0)
-			XrayOff(obj)
-		elseif key == bringgunkey then --Teleport Gun to You
-			if game.Workspace.GunDrop.CFrame ~= nil then
-				game.Workspace.GunDrop.CFrame = game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame
-			else
-				if printvar == true then
-					print("Gun not currently dropped")
-				end
-			end
-		elseif key == hideshowguikey then --Show/Hide Gui
-			if showvar == false then
-				showvar = true
-				Show.Visible = false
-				Main.Visible = true
-				if printvar == true then
-					print("Shown")
-				end
-			elseif showvar == true then
-				showvar = false
-				Main.Visible = false
-				Show.Visible = true
-				if printvar == true then
-					print("Hidden")
-				end
-			end
-		end
-	end
-end)
 end
+while env.enabledGunBot do
+	if Char and Char:FindFirstChild("Gun") then
+		setupGunBot(Char)
+	end
+	task.wait(0.25)
+end
+if not env.enabledGunBot then
+	if env.GunBotConnection.Connection then
+		env.GunBotConnection.Connection:Disconnect()
+		env.GunBotConnection.Connection = nil
+	end
+end
+else
+if not env.AsChange then return end
+if env.AsChange.Value then
+env.AsChange:Set(false)
+OrionLib:MakeNotification({Name = "Your Executor Is Not Support This Function",Content = "Sorry, use a better one",Image = "rbxassetid://7733658504",Time = 3})
+end
+end
+	end    
+})
+env.AsChange = AimbotMem
+MainTab:AddToggle({
+	Name = "Seconds Life",
+	Default = false,
+	Callback = function(Value)
+local godcon, deathcon
+env.enableGodmode = Value
+local function IsGodmode()
+    return env.enableGodmode
+end
+local function UpdateGod()
+    if godcon then
+        godcon:Disconnect()
+        godcon = nil
+    end
+    if Hum then
+        godcon = Hum.HealthChanged:Connect(function()
+            if IsGodmode() and Hum.Health < Hum.MaxHealth then
+                Hum.Health = Hum.MaxHealth
+            end
+        end)
+    end
+end
+local function OnCharacterAdded(newChar)
+    Char = newChar
+    Hum = Char:WaitForChild("Humanoid")
+    UpdateGod()
+end
+if deathcon then deathcon:Disconnect() end
+deathcon = LocalPlayer.CharacterAdded:Connect(OnCharacterAdded)
+UpdateGod()
+task.spawn(function()
+        if not env.enableGodmode then
+            if godcon then
+                godcon:Disconnect()
+                godcon = nil
+             end
+        else
+            if not godcon then
+                UpdateGod()
+            end
+        end
+end)
+	end    
+})
+MainTab:AddToggle({
+	Name = "Touch Fling",
+	Default = false,
+	Callback = function(Value)
+env.isTouchfling = Value
+local vel, movel = nil, 0.1
+while env.isTouchfling do
+RunService.Heartbeat:Wait()
+vel = Root.Velocity
+Root.Velocity = vel * 9e8 + Vector3.new(0, 9e8, 0)
+RunService.RenderStepped:Wait()
+if Char and Char.Parent and Root and Root.Parent then
+Root.Velocity = vel
+end
+RunService.Stepped:Wait()
+if Char and Char.Parent and Root and Root.Parent then
+Root.Velocity = vel + Vector3.new(0, movel, 0)
+movel = movel * -1
+end
+end
+end
+})
+MainTab:AddToggle({
+    Name = "Noclip Players (AntiFling)",
+    Default = false,
+    Callback = function(value)
+        env.NoclipPlr = value
+if not env.NoclipPlr then
+for _, player in pairs(Players:GetPlayers()) do
+            if player ~= LocalPlayer and player.Character then
+                for _, v in pairs(player.Character:GetDescendants()) do
+                    if v:IsA("BasePart") then
+                        v.CanCollide = true
+                    end
+                end
+            end
+        end
+end
+while env.NoclipPlr do
+for _, player in pairs(Players:GetPlayers()) do
+            if player ~= LocalPlayer and player.Character then
+                for _, v in pairs(player.Character:GetDescendants()) do
+                    if v:IsA("BasePart") then
+                        v.CanCollide = false
+                    end
+                end
+            end
+        end
+          task.wait()
+        end
+    end
+})
+MainTab:AddButton({
+	Name = "Teleport To Map",
+	Callback = function()
+local map = Workspace:FindFirstChild("CoinContainer", true)
+if map and map.Parent then
+local part = map:FindFirstChildWhichIsA("BasePart", true)
+local parts = map.Parent:FindFirstChildWhichIsA("BasePart", true)
+if Char and part and part.CFrame then
+Char:PivotTo(part.CFrame * CFrame.new(0, 2, 0))
+elseif Char and parts and parts.CFrame then
+Char:PivotTo(parts.CFrame * CFrame.new(0, 2, 0))
+elseif Root and part and part.CFrame then
+Root.CFrame = part.CFrame * CFrame.new(0, 2, 0)
+elseif Root and parts and parts.CFrame then
+Root.CFrame = parts.CFrame * CFrame.new(0, 2, 0)
+end
+end
+  	end    
+})
+MainTab:AddButton({
+	Name = "Teleport To Lobby",
+	Callback = function()
+local lobby = Workspace:FindFirstChild("Lobby", true)
+if lobby and lobby.Parent then
+local part = lobby:FindFirstChildWhichIsA("BasePart", true)
+local parts = lobby.Parent:FindFirstChildWhichIsA("BasePart", true)
+if Char and part and part.CFrame then
+Char:PivotTo(part.CFrame * CFrame.new(0, 2, 0))
+elseif Char and parts and parts.CFrame then
+Char:PivotTo(parts.CFrame * CFrame.new(0, 2, 0))
+elseif Root and part and part.CFrame then
+Root.CFrame = part.CFrame * CFrame.new(0, 2, 0)
+elseif Root and parts and parts.CFrame then
+Root.CFrame = parts.CFrame * CFrame.new(0, 2, 0)
+end
+end
+  	end    
+})
+MainTab:AddSlider({
+	Name = "Set Timeout Fling",
+	Min = 0.5,
+	Max = 10,
+	Default = 2.5,
+	Color = Color3.fromRGB(255, 255, 255),
+	Increment = 0.1,
+	ValueName = "Timeout",
+	Callback = function(Value)
+		env.timeout = Value
+	end    
+})
+MainTab:AddButton({
+	Name = "Fling Murderer",
+	Callback = function()
+local Murderer = nil
+for plr, role in getRoles() do
+if role == "Murderer" then
+Murderer = Players:FindFirstChild(plr)
+break
+end
+end
+if Murderer and Murderer ~= LocalPlayer then
+    SHubFling(Murderer)
+end
+	end    
+})
+MainTab:AddButton({
+	Name = "Fling Sheriff/Hero",
+	Callback = function()
+local Target = nil
+for plr, role in getRoles() do
+if role == "Sheriff" or role == "Hero" then
+Target = Players:FindFirstChild(plr)
+break
+end
+end
+if Target and Target ~= LocalPlayer then
+    SHubFling(Target)
+end
+	end    
+})
+local function getPlayerNames()
+    local name = {}
+    for _, player in ipairs(Players:GetPlayers()) do
+         if player ~= LocalPlayer then
+            table.insert(name, player.Name)
+      end
+    end
+    return name
+end
+local TargetPlayer = nil
+local PlayerDropdown = MainTab:AddDropdown({
+    Name = "Select Player",
+    Default = nil,
+    Options = getPlayerNames(),
+    Callback = function(Value)
+        TargetPlayer = Value
+    end
+})
+local function updateDropdown()
+    PlayerDropdown:Refresh(getPlayerNames(), true)
+    PlayerDropdown:Set(TargetPlayer)
+end
+Players.PlayerAdded:Connect(updateDropdown)
+Players.PlayerRemoving:Connect(updateDropdown)
+MainTab:AddButton({
+	Name = "Fling Select Player",
+	Callback = function()
+if TargetPlayer then
+local get = Players:FindFirstChild(TargetPlayer)
+if get and get ~= LocalPlayer then
+    SHubFling(get)
+end
+end
+	end    
+})
+PlayerTab:AddToggle({
+	Name = "Infinity Jump",
+	Default = false,
+	Callback = function(Value)
+env.InfiniteJump = Value
+game:GetService("UserInputService").JumpRequest:Connect(function()
+if env.InfiniteJump then
+if Char and Char ~= nil and Hum then
+Hum:ChangeState("Jumping")
+end
+end
+end)
+	end    
+})
+PlayerTab:AddToggle({
+    Name = "Noclip",
+    Default = false,
+    Callback = function(value)
+        env.Noclip = value
+if not env.Noclip then
+     if Char and Char ~= nil then
+             for _, c in pairs(Char:GetChildren()) do
+                    if c:IsA("BasePart") and not c.CanCollide then
+                        c.CanCollide = true
+                    end
+                end
+            end
+    end
+while env.Noclip do
+        if Char and Char ~= nil then
+               for _, c in pairs(Char:GetChildren()) do
+                    if c:IsA("BasePart") and c.CanCollide then
+                        c.CanCollide = false
+                    end
+                end
+            end
+          task.wait()
+        end
+    end
+})
+PlayerTab:AddSlider({
+    Name = "WalkSpeed",
+    Min = 16,
+    Max = 350,
+    Default = env.Walkspeed or 16,
+    Color = Color3.fromRGB(255,255,255),
+    Increment = 1,
+    ValueName = "WalkSpeed",
+    Callback = function(Value)
+if Char and Char ~= nil and Hum then
+Hum.WalkSpeed = Value or 16
+end
+env.Walkspeed = Value or 16
+    end    
+})
+PlayerTab:AddTextbox({
+    Name = "WalkSpeed",
+    Default = env.Walkspeed or "16",
+    TextDisappear = false,
+    Callback = function(Value)
+if Char and Char ~= nil and Hum then
+Hum.WalkSpeed = tonumber(Value) or 16
+end
+env.Walkspeed = tonumber(Value) or 16
+    end	  
+})
+PlayerTab:AddToggle({
+    Name = "WalkSpeed Set Auto",
+    Default = false,
+    Callback = function(Value)
+env.KeepWalkspeed = Value
+while env.KeepWalkspeed do
+if Char and Char ~= nil and Hum then
+      if Hum.WalkSpeed ~= env.Walkspeed then
+        Hum.WalkSpeed = env.Walkspeed
+      end
+end
+            task.wait()
+        end
+    end    
+})
+PlayerTab:AddSlider({
+    Name = "JumpPower",
+    Min = 50,
+    Max = 500,
+    Default = env.Jumppower or 50,
+    Color = Color3.fromRGB(255,255,255),
+    Increment = 1,
+    ValueName = "JumpPower",
+    Callback = function(Value)
+if Char and Char ~= nil and Hum then
+    Hum.JumpPower = Value or 50
+end
+        env.Jumppower = Value or 50
+    end    
+})
+PlayerTab:AddTextbox({
+    Name = "JumpPower",
+    Default = env.Jumppower or "50",
+    TextDisappear = false,
+    Callback = function(Value)
+if Char and Char ~= nil and Hum then
+   Hum.JumpPower = tonumber(Value) or 50
+  end
+        env.Jumppower = tonumber(Value) or 50
+    end	  
+})
+PlayerTab:AddToggle({
+    Name = "JumpPower Set Auto",
+    Default = false,
+    Callback = function(Value)
+env.KeepJumppower = Value
+while env.KeepJumppower do
+if Char and Char ~= nil and Hum then
+            if Hum.JumpPower ~= env.Jumppower then
+                Hum.JumpPower = env.Jumppower
+            end
+       end
+            task.wait()
+        end
+    end    
+})
