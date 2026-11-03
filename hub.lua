@@ -29,23 +29,18 @@ local function launch()
     end)
 end
 
--- Dans MM2 : lancement direct, sans fenêtre
-if isMM2() then
-    local ok, err = launch()
-    if not ok then
-        warn("[MonHub] " .. MM2.Name .. " a échoué : " .. tostring(err))
-    end
-    return
-end
+local inMM2 = isMM2()
+print("[MonHub] inMM2 =", inMM2)
 
--- Ailleurs : on affiche la fenêtre
-if type(_G.MonHubMM2) == "table" then
+-- Nettoyage d'une ancienne fenêtre
+if type(_G.MonHubMM2) == "table" and _G.MonHubMM2.Window then
     pcall(function()
         _G.MonHubMM2.Window:Destroy()
     end)
 end
 _G.MonHubMM2 = {}
 
+-- Chargement de Slate
 local okSlate, Slate = pcall(function()
     return loadstring(game:HttpGet(SLATE_URL), "@Slate")()
 end)
@@ -53,6 +48,7 @@ if not okSlate or not Slate then
     warn("[MonHub] Slate n'a pas pu se charger : " .. tostring(Slate))
     return
 end
+print("[MonHub] Slate chargé")
 
 pcall(function() Slate.Cleanup() end)
 pcall(function() Slate:PreloadIcons({ "lucide" }) end)
@@ -77,70 +73,3 @@ local placeName = "ce jeu"
 pcall(function()
     local info = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId)
     if info and info.Name then
-        placeName = info.Name
-    end
-end)
-
-do
-    local notice = Tab:CreateSection({ Name = "Jeu non supporté" })
-    notice:Paragraph({
-        Name = "Tu es dans : " .. placeName,
-        Description = "Ce hub est fait pour Murder Mystery 2. Le script risque de ne pas marcher ici.",
-    })
-end
-
-do
-    local list = Tab:CreateSection({ Name = "Script disponible" })
-    list:Button({
-        Name = "Lancer " .. MM2.Name,
-        Icon = "play",
-        Callback = function()
-            Slate:Notify({
-                Title = "MonHub",
-                Description = "Lancement de " .. MM2.Name,
-                Icon = "play",
-                Duration = 5,
-            })
-            task.spawn(function()
-                local ok, err = launch()
-                if ok then
-                    Slate:Notify({
-                        Title = "MonHub",
-                        Description = MM2.Name .. " lancé",
-                        Icon = "circle-check",
-                        Tone = "Success",
-                        Duration = 8,
-                    })
-                else
-                    Slate:Notify({
-                        Title = "MonHub",
-                        Description = "Échec : " .. tostring(err),
-                        Icon = "circle-alert",
-                        Tone = "Danger",
-                        Duration = 10,
-                    })
-                end
-            end)
-        end,
-    })
-end
-
-do
-    local close = Tab:CreateSection({ Name = "Menu" })
-    close:Button({
-        Name = "Fermer le menu",
-        Icon = "x",
-        Callback = function()
-            pcall(function() Window:Destroy() end)
-            _G.MonHubMM2 = nil
-        end,
-    })
-end
-
-Slate:Notify({
-    Title = "MonHub",
-    Description = "Pas dans MM2. Clique sur Lancer pour l'exécuter quand même.",
-    Icon = "triangle-alert",
-    Tone = "Warning",
-    Duration = 10,
-})
