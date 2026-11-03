@@ -1,627 +1,1143 @@
--- mm2.lua : panneau MM2 complet (tout vient de mon dépôt)
-print("[mm2] chargé")
+if game.PlaceId == 142823291 then --Proofing just because ;)
+--Note: Don't reset with godmode on or you will be stuck on a black screen for a reasonable amount of time
+--Change to false if you dont like printing to console
+local printvar = true
+--Change to true if you want to see names instead of murderer, sheriff, and innocents with esp
+local espnames = true
+--Change keybinds to your liking
+local coinkey = "c" --Coin grabber keybind
+local MSkey = "m" --Murderer/Sheriff esp keybind
+local playerskey = "q" --All players esp keybind
+local espoffkey = "b" --Turn esp off keybind
+local flykey = "f" --Fly keybind
+local noclipkey = "r" --Noclip keybind
+local godmodekey = "g" --Godmode keybind
+local xrayonkey = "x" --Xray on keybind
+local xrayoffkey = "z" --Xray off keybind
+local bringgunkey = "t" --Teleport to gun keybind
+local hideshowguikey = "p" --Show/Hide gui keybind
+--End of easy customization options
 
-local SLATE_URL = "https://raw.githubusercontent.com/lnothingltherel/MM2hub/refs/heads/main/slate.lua"
+--Gui Buttons and Status--
+local MM2 = Instance.new("ScreenGui")
+local Main = Instance.new("Frame")
+local Title = Instance.new("TextLabel")
+local Coin = Instance.new("TextButton")
+local MSEsp = Instance.new("TextButton")
+local MSESPActive = Instance.new("TextLabel")
+local PlayersEsp = Instance.new("TextButton")
+local PlayersEspActive = Instance.new("TextLabel")
+local EspOff = Instance.new("TextButton")
+local EspOffActive = Instance.new("TextLabel")
+local Run = Instance.new("TextButton")
+local RunActiveGui = Instance.new("TextLabel")
+local Fly = Instance.new("TextButton")
+local FlyActive = Instance.new("TextLabel")
+local Noclip = Instance.new("TextButton")
+local NoclipActive = Instance.new("TextLabel")
+local GodMode = Instance.new("TextButton")
+local GodModeActive = Instance.new("TextLabel")
+local GuiXrayOn = Instance.new("TextButton")
+local GuiXrayOnActive = Instance.new("TextLabel")
+local GuiXrayOff = Instance.new("TextButton")
+local GuiXrayOffActive = Instance.new("TextLabel")
+local BringGun = Instance.new("TextButton")
+local Keybinds = Instance.new("TextButton")
+local KeybindsActive = Instance.new("TextLabel")
+local Hide = Instance.new("TextButton")
+local Show = Instance.new("TextButton")
 
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
-local Lighting = game:GetService("Lighting")
-local TeleportService = game:GetService("TeleportService")
-local VirtualUser = game:GetService("VirtualUser")
-local HttpService = game:GetService("HttpService")
-local LocalPlayer = Players.LocalPlayer
+--Other Variables
+local runActive = false
+local teamname = "None"
+local murderer = "None"
+local sheriff = "None"
+local player = game:GetService("Players").LocalPlayer
 
--- Ferme l'ancien panneau s'il existe
-if type(_G.MonHubPanel) == "table" and _G.MonHubPanel.Cleanup then
-    pcall(_G.MonHubPanel.Cleanup)
-end
-_G.MonHubPanel = {}
+local esp = false
+local plresp
+local track = false
 
-local okSlate, Slate = pcall(function()
-    return loadstring(game:HttpGet(SLATE_URL), "@Slate")()
-end)
-if not okSlate or type(Slate) ~= "table" then
-    warn("[mm2] Slate n'a pas pu se charger : " .. tostring(Slate))
-    return
-end
-pcall(function() Slate:PreloadIcons({ "lucide" }) end)
+local NClip = false
+local char = game.Players.LocalPlayer.Character
+local obj = game.workspace
+local mouse=game.Players.LocalPlayer:GetMouse()
+local LP = game:GetService("Players").LocalPlayer
+local flyvar = false
 
-----------------------------------------------------------------
--- État
-----------------------------------------------------------------
-local state = {
-    speedOn = false, speed = 16,
-    jumpOn = false, jump = 50,
-    infJump = false,
-    noclip = false,
-    fly = false, flySpeed = 60,
-    esp = false, espNames = true,
-    gunEsp = false,
-    fullbright = false,
-    noFog = false,
-    fov = 70, fovOn = false,
-    antiAfk = true,
-}
+local showvar = true
+local inputcode = game:GetService("UserInputService")
+local godmodevar = false
+local keyOff = false
+local NClip = false
 
-local connections = {}
-local espObjects = {}
-local gunHighlight
-local flyBV, flyBG
+--Start of Gui--
+MM2.Name = "MM2"
+MM2.Parent = game.CoreGui
+MM2.ResetOnSpawn = false
 
-local oldLighting = {
-    Brightness = Lighting.Brightness,
-    ClockTime = Lighting.ClockTime,
-    GlobalShadows = Lighting.GlobalShadows,
-    Ambient = Lighting.Ambient,
-    FogEnd = Lighting.FogEnd,
-}
+Main.Name = "Main"
+Main.Parent = MM2
+Main.BackgroundColor3 = Color3.new(0.188235, 0.188235, 0.188235)
+Main.BorderColor3 = Color3.new(0, 0.607843, 1)
+Main.BorderSizePixel = 5
+Main.Draggable = true
+Main.Position = UDim2.new(0.574999988, 0, 0.349999994, 0)
+Main.Size = UDim2.new(0.2, 0, 0.4, 0)
+Main.Visible = true
+Main.Active = true
 
-local function getChar() return LocalPlayer.Character end
-local function getHumanoid()
-    local c = getChar()
-    return c and c:FindFirstChildOfClass("Humanoid")
-end
-local function getRoot()
-    local c = getChar()
-    return c and c:FindFirstChild("HumanoidRootPart")
-end
+Title.Name = "Title"
+Title.Parent = Main
+Title.BackgroundColor3 = Color3.new(0.188235, 0.188235, 0.188235)
+Title.BorderColor3 = Color3.new(0, 0.607843, 1) 
+Title.BorderSizePixel = 5
+Title.Draggable = true
+Title.Size = UDim2.new(1.005, 0, 0.2, 0)
+Title.ZIndex = 3
+Title.Font = Enum.Font.SciFi
+Title.FontSize = Enum.FontSize.Size24
+Title.Text = "Murder Mystery 2"
+Title.TextColor3 = Color3.new(0, 0.607843, 1)
+Title.TextScaled = true
+Title.TextSize = 20
+Title.TextStrokeColor3 = Color3.new(0.129412, 0.54902, 1)
+Title.TextWrapped = true
 
-----------------------------------------------------------------
--- Rôles MM2 (visibles une fois la manche lancée)
-----------------------------------------------------------------
-local function hasTool(player, name)
-    if player.Character and player.Character:FindFirstChild(name) then return true end
-    if player.Backpack and player.Backpack:FindFirstChild(name) then return true end
-    return false
-end
-
-local function getRole(player)
-    if hasTool(player, "Knife") then return "Murderer" end
-    if hasTool(player, "Gun") then return "Sheriff" end
-    return "Innocent"
-end
-
-local ROLE_COLORS = {
-    Murderer = Color3.fromRGB(255, 60, 60),
-    Sheriff = Color3.fromRGB(70, 140, 255),
-    Innocent = Color3.fromRGB(80, 220, 120),
-}
-
-----------------------------------------------------------------
--- ESP joueurs
-----------------------------------------------------------------
-local function removeEsp(player)
-    local entry = espObjects[player]
-    if entry then
-        pcall(function() entry.hl:Destroy() end)
-        pcall(function() entry.gui:Destroy() end)
-        espObjects[player] = nil
-    end
-end
-
-local function clearEsp()
-    for player in pairs(espObjects) do
-        removeEsp(player)
-    end
-end
-
-local function refreshEsp()
-    for player, entry in pairs(espObjects) do
-        if not player.Parent or not player.Character or entry.hl.Parent ~= player.Character then
-            removeEsp(player)
-        end
-    end
-    for _, player in ipairs(Players:GetPlayers()) do
-        local char = player.Character
-        local head = char and char:FindFirstChild("Head")
-        if player ~= LocalPlayer and char and head then
-            local entry = espObjects[player]
-            if not entry then
-                local hl = Instance.new("Highlight")
-                hl.FillTransparency = 0.55
-                hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-                hl.Parent = char
-
-                local gui = Instance.new("BillboardGui")
-                gui.Size = UDim2.fromOffset(140, 20)
-                gui.StudsOffset = Vector3.new(0, 2.6, 0)
-                gui.AlwaysOnTop = true
-                gui.Adornee = head
-                gui.Parent = head
-
-                local label = Instance.new("TextLabel")
-                label.BackgroundTransparency = 1
-                label.Size = UDim2.fromScale(1, 1)
-                label.Font = Enum.Font.GothamBold
-                label.TextSize = 13
-                label.TextStrokeTransparency = 0.4
-                label.Parent = gui
-
-                entry = { hl = hl, gui = gui, label = label }
-                espObjects[player] = entry
-            end
-            local role = getRole(player)
-            local color = ROLE_COLORS[role]
-            entry.hl.FillColor = color
-            entry.hl.OutlineColor = color
-            entry.label.TextColor3 = color
-            entry.label.Text = player.DisplayName .. " [" .. role .. "]"
-            entry.gui.Enabled = state.espNames
-        end
-    end
+--Start of functions for buttons--
+function Create(base, team, colors1, colors2, colors3, teamname) --For all esps
+	local bb = Instance.new("BillboardGui",player.PlayerGui)
+	bb.Adornee = base
+	bb.ExtentsOffset = Vector3.new(0,1,0)
+	bb.AlwaysOnTop = true
+	bb.Size = UDim2.new(0,5,0,5)
+	bb.StudsOffset = Vector3.new(0,1,0)
+	bb.Name = "tracker"
+	local frame = Instance.new("Frame",bb)
+	frame.ZIndex = 10
+	frame.BackgroundTransparency = 0.3
+	frame.Size = UDim2.new(1,0,1,0)
+	local txtlbl = Instance.new("TextLabel",bb)
+	txtlbl.ZIndex = 10
+	txtlbl.Text = teamname
+	txtlbl.BackgroundTransparency = 1
+	txtlbl.Position = UDim2.new(0,0,0,-35)
+	txtlbl.Size = UDim2.new(1,0,10,0)
+	txtlbl.Font = "ArialBold"
+	txtlbl.FontSize = "Size12"
+	txtlbl.TextStrokeTransparency = 0.5
+	if team then --For teams, left over from origianl but never removed
+		txtlbl.TextColor3 = Color3.new(0,0,255)
+		frame.BackgroundColor3 = Color3.new(0,0,255)
+	else
+		txtlbl.TextColor3 = Color3.new(colors1,colors2,colors3)
+		frame.BackgroundColor3 = Color3.new(colors1,colors2,colors3)
+	end
 end
 
-----------------------------------------------------------------
--- ESP arme tombée
-----------------------------------------------------------------
-local function refreshGun()
-    local drop = workspace:FindFirstChild("GunDrop", true)
-    if drop and (not gunHighlight or gunHighlight.Parent ~= drop) then
-        if gunHighlight then pcall(function() gunHighlight:Destroy() end) end
-        gunHighlight = Instance.new("Highlight")
-        gunHighlight.FillColor = Color3.fromRGB(255, 220, 60)
-        gunHighlight.OutlineColor = Color3.fromRGB(255, 220, 60)
-        gunHighlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-        gunHighlight.Parent = drop
-    elseif not drop and gunHighlight then
-        pcall(function() gunHighlight:Destroy() end)
-        gunHighlight = nil
-    end
+function findmurderer() --Find who the murderer is
+	local colors1 = 255
+	local colors2 = 0
+	local colors3 = 0
+	for i, v in pairs(game:GetService("Players"):GetChildren()) do
+		if v ~= game:GetService("Players").LocalPlayer then
+			for i,v in pairs(v.Backpack:GetChildren()) do --Checks backpack for knife
+				if v.Name == "Knife" then
+					if espnames == true then
+						local teamname = v.Parent.Parent.Name
+						if v.Parent.Parent.Character.Head ~= nil then
+							Create(v.Parent.Parent.Character.Head, false, colors1 ,colors2, colors3, teamname)
+						else
+							if printvar == true then
+								print("Head missing from murderer!")
+							end
+						end
+					elseif espnames == false then
+						local teamname = "Murderer"
+						if v.Parent.Parent.Character.Head ~= nil then
+							Create(v.Parent.Parent.Character.Head, false, colors1 ,colors2, colors3, teamname)
+						else
+							if printvar == true then
+								print("Head missing from murderer!")
+							end
+						end
+					end
+					murderer = v.Parent.Parent.Name
+					if printvar == true then
+						print(murderer.." is Murderer")
+					end
+				end
+			end
+			for i,v in pairs(v.Character:GetChildren()) do --Checks workspace player for knife (holding it)
+				if v.Name == "Knife" then
+					if espnames == true then
+						local teamname = v.Parent.Name
+						if v.Parent.Head ~= nil then --Tried to failproof to stop printing nil
+							Create(v.Parent.Head, false, colors1 ,colors2, colors3, teamname)
+						else
+							if printvar == true then
+								print("Head missing from murderer!")
+							end
+						end
+					elseif espnames == false then
+						local teamname = "Murderer"
+						if v.Parent.Head ~= nil then
+							Create(v.Parent.Head, false, colors1 ,colors2, colors3, teamname)
+						else
+							if printvar == true then
+								print("Head missing from murderer!")
+							end
+						end
+					end
+					murderer = v.Parent.Name
+					if printvar == true then --Tried to failproof to stop printing nil
+						local murderer1 = tostring(v.Parent.Name)
+						print(murderer1.." is Murderer")
+					end
+				end
+			end
+		end
+	end
+end
+	
+function findsheriff() --Find who the sheriff is
+	local colors1 = 0
+	local colors2 = 0
+	local colors3 = 255
+	for i, v in pairs(game:GetService("Players"):GetChildren()) do
+		if v ~= game:GetService("Players").LocalPlayer then
+			for i,v in pairs(v.Backpack:GetChildren()) do
+				if v.Name == "Revolver" or v.Name == "Gun" then --Lazy to check if its revolver or gun and checks backpack for gun
+					if espnames == true then
+						local teamname = v.Parent.Parent.Name
+						if v.Parent.Parent.Character.Head ~= nil then --Tried to failproof to stop printing nil
+							Create(v.Parent.Parent.Character.Head, false, colors1 ,colors2, colors3, teamname)
+						else
+							if printvar == true then
+								print("Head missing from sheriff!")
+							end
+						end
+					elseif espnames == false then
+						local teamname = "Sheriff"
+						if v.Parent.Parent.Character.Head ~= nil then --Tried to failproof to stop printing nil
+							Create(v.Parent.Parent.Character.Head, false, colors1 ,colors2, colors3, teamname)
+						else
+							if printvar == true then
+								print("Head missing from sheriff!")
+							end
+						end
+					end
+					sheriff = v.Parent.Parent.Name
+					if printvar == true then
+						local sheriff1 = tostring(v.Parent.Parent.Name)
+						print(sheriff1.." is Sheriff")
+					end
+				end
+			end
+			for i,v in pairs(v.Character:GetChildren()) do
+				if v.Name == "Revolver" or v.Name == "Gun" then --Lazy to check if its revolver or gun and checks workspace player for gun (holding it)
+					if espnames == true then
+						local teamname = v.Parent.Name
+						if v.Parent.Head ~= nil then --Tried to failproof to stop printing nil
+							Create(v.Parent.Head, false, colors1 ,colors2, colors3, teamname)
+						else
+							if printvar == true then
+								print("Head missing from sheriff!")
+							end
+						end
+					elseif espnames == false then
+						local teamname = "Sheriff"
+						if v.Parent.Head ~= nil then --Tried to failproof to stop printing nil
+							Create(v.Parent.Head, false, colors1 ,colors2, colors3, teamname)
+						else
+							if printvar == true then
+								print("Head missing from sheriff!")
+							end
+						end
+					end
+					sheriff = v.Parent.Name
+					if printvar == true then
+						local sheriff1 = tostring(v.Parent.Name)
+						print(sheriff1.." is Sheriff")
+					end
+				end
+			end
+		end
+	end
 end
 
-local function clearGun()
-    if gunHighlight then
-        pcall(function() gunHighlight:Destroy() end)
-        gunHighlight = nil
-    end
+function findplayers() --Find all players but local player
+	findmurderer() --Finds murderer
+	findsheriff() --Finds sheriff
+	local colors1 = 0
+	local colors2 = 255
+	local colors3 = 0
+	for i, v in pairs(game:GetService("Players"):GetChildren()) do
+		if v ~= game:GetService("Players").LocalPlayer then --If not local player
+			if v.Name ~= murderer then --If not murderer
+				if v.Name ~= sheriff then --If not sheriff
+					if espnames == true then
+						local teamname = v.Name
+						if v.Character.Head ~= nil then --Tried to failproof to stop printing nil
+							Create(v.Character.Head, false, colors1 ,colors2, colors3, teamname)
+						else
+							if printvar == true then
+								print("Head missing from sheriff!")
+							end
+						end
+					elseif espnames == false then
+						local teamname = "Innocents"
+						if v.Parent.Head ~= nil then --Tried to failproof to stop printing nil
+							Create(v.Character.Head, false, colors1 ,colors2, colors3, teamname)
+						else
+							if printvar == true then
+								print("Head missing from sheriff!")
+							end
+						end
+					end
+				end
+			end
+		end
+	end
 end
 
-----------------------------------------------------------------
--- Vol
-----------------------------------------------------------------
-local function stopFly()
-    if flyBV then pcall(function() flyBV:Destroy() end) flyBV = nil end
-    if flyBG then pcall(function() flyBG:Destroy() end) flyBG = nil end
-    local hum = getHumanoid()
-    if hum then hum.PlatformStand = false end
+function Clear() --Clears all the esps
+	for _,v in pairs(player.PlayerGui:children()) do
+		if v.Name == "tracker" and v:isA("BillboardGui") then
+			v:Destroy()
+		end
+	end
 end
 
-local function startFly()
-    local root, hum = getRoot(), getHumanoid()
-    if not root or not hum then return end
-    stopFly()
-    flyBV = Instance.new("BodyVelocity")
-    flyBV.MaxForce = Vector3.new(1e9, 1e9, 1e9)
-    flyBV.Velocity = Vector3.zero
-    flyBV.Parent = root
-    flyBG = Instance.new("BodyGyro")
-    flyBG.MaxTorque = Vector3.new(1e9, 1e9, 1e9)
-    flyBG.P = 1e4
-    flyBG.CFrame = root.CFrame
-    flyBG.Parent = root
-    hum.PlatformStand = true
+function XrayOn(obj) --Enables xray
+	for _,v in pairs(obj:GetChildren()) do 
+		if (v:IsA("BasePart")) and not v.Parent:FindFirstChild("Humanoid") then
+			v.LocalTransparencyModifier = 0.75
+		end
+	XrayOn(v) 
+	end
+end 
+
+function XrayOff(obj) --Disables xray
+	for _,v in pairs(obj:GetChildren()) do
+		if (v:IsA("BasePart")) and not v.Parent:FindFirstChild("Humanoid") then
+			v.LocalTransparencyModifier = 0
+		end XrayOff(v)
+	end
 end
 
-----------------------------------------------------------------
--- Lumière
-----------------------------------------------------------------
-local function setFullbright(on)
-    if on then
-        Lighting.Brightness = 2
-        Lighting.ClockTime = 14
-        Lighting.GlobalShadows = false
-        Lighting.Ambient = Color3.fromRGB(180, 180, 180)
-    else
-        Lighting.Brightness = oldLighting.Brightness
-        Lighting.ClockTime = oldLighting.ClockTime
-        Lighting.GlobalShadows = oldLighting.GlobalShadows
-        Lighting.Ambient = oldLighting.Ambient
-    end
+function sFLY() --Fly function
+	repeat wait() until LP and LP.Character and LP.Character:FindFirstChild('Torso') and LP.Character:FindFirstChild('Humanoid')
+	repeat wait() until mouse
+	
+	local T = LP.Character.Torso
+	local CONTROL = {F = 0, B = 0, L = 0, R = 0}
+	local lCONTROL = {F = 0, B = 0, L = 0, R = 0}
+	local SPEED = 0
+	
+	local function FLY()
+		FLYING = true
+		local BG = Instance.new('BodyGyro', T)
+		local BV = Instance.new('BodyVelocity', T)
+		BG.P = 9e4
+		BG.maxTorque = Vector3.new(9e9, 9e9, 9e9)
+		BG.cframe = T.CFrame
+		BV.velocity = Vector3.new(0, 0.1, 0)
+		BV.maxForce = Vector3.new(9e9, 9e9, 9e9)
+		spawn(function()
+			repeat wait()
+				LP.Character.Humanoid.PlatformStand = true
+				if CONTROL.L + CONTROL.R ~= 0 or CONTROL.F + CONTROL.B ~= 0 then
+					SPEED = 50
+				elseif not (CONTROL.L + CONTROL.R ~= 0 or CONTROL.F + CONTROL.B ~= 0) and SPEED ~= 0 then
+					SPEED = 0
+				end
+				if (CONTROL.L + CONTROL.R) ~= 0 or (CONTROL.F + CONTROL.B) ~= 0 then
+					BV.velocity = ((workspace.CurrentCamera.CoordinateFrame.lookVector * (CONTROL.F + CONTROL.B)) + ((workspace.CurrentCamera.CoordinateFrame * CFrame.new(CONTROL.L + CONTROL.R, (CONTROL.F + CONTROL.B) * 0.2, 0).p) - workspace.CurrentCamera.CoordinateFrame.p)) * SPEED
+					lCONTROL = {F = CONTROL.F, B = CONTROL.B, L = CONTROL.L, R = CONTROL.R}
+				elseif (CONTROL.L + CONTROL.R) == 0 and (CONTROL.F + CONTROL.B) == 0 and SPEED ~= 0 then
+					BV.velocity = ((workspace.CurrentCamera.CoordinateFrame.lookVector * (lCONTROL.F + lCONTROL.B)) + ((workspace.CurrentCamera.CoordinateFrame * CFrame.new(lCONTROL.L + lCONTROL.R, (lCONTROL.F + lCONTROL.B) * 0.2, 0).p) - workspace.CurrentCamera.CoordinateFrame.p)) * SPEED
+				else
+					BV.velocity = Vector3.new(0, 0.1, 0)
+				end
+				BG.cframe = workspace.CurrentCamera.CoordinateFrame
+			until not FLYING
+			CONTROL = {F = 0, B = 0, L = 0, R = 0}
+			lCONTROL = {F = 0, B = 0, L = 0, R = 0}
+			SPEED = 0
+			BG:destroy()
+			BV:destroy()
+			LP.Character.Humanoid.PlatformStand = false
+		end)
+	end
+	
+	mouse.KeyDown:connect(function(KEY)
+		if KEY:lower() == 'w' then
+			CONTROL.F = 1
+		elseif KEY:lower() == 's' then
+			CONTROL.B = -1
+		elseif KEY:lower() == 'a' then
+			CONTROL.L = -1 
+		elseif KEY:lower() == 'd' then 
+			CONTROL.R = 1
+		end
+	end)
+	
+	mouse.KeyUp:connect(function(KEY)
+		if KEY:lower() == 'w' then
+			CONTROL.F = 0
+		elseif KEY:lower() == 's' then
+			CONTROL.B = 0
+		elseif KEY:lower() == 'a' then
+			CONTROL.L = 0
+		elseif KEY:lower() == 'd' then
+			CONTROL.R = 0
+		end
+	end)
+	FLY()
 end
 
-local function setNoFog(on)
-    Lighting.FogEnd = on and 1e6 or oldLighting.FogEnd
+function NOFLY() --Unfly function
+	FLYING = false
+	LP.Character.Humanoid.PlatformStand = false
 end
 
-----------------------------------------------------------------
--- Boucles
-----------------------------------------------------------------
-table.insert(connections, RunService.Heartbeat:Connect(function()
-    local hum = getHumanoid()
-    if hum then
-        if state.speedOn then hum.WalkSpeed = state.speed end
-        if state.jumpOn then
-            hum.UseJumpPower = true
-            hum.JumpPower = state.jump
-        end
-    end
-
-    local camera = workspace.CurrentCamera
-    if camera and state.fovOn then
-        camera.FieldOfView = state.fov
-    end
-
-    if state.fly then
-        local root = getRoot()
-        if root and camera then
-            if not flyBV or not flyBV.Parent then startFly() end
-            if flyBV and flyBG then
-                local dir = Vector3.zero
-                local cf = camera.CFrame
-                if UserInputService:IsKeyDown(Enum.KeyCode.W) then dir += cf.LookVector end
-                if UserInputService:IsKeyDown(Enum.KeyCode.S) then dir -= cf.LookVector end
-                if UserInputService:IsKeyDown(Enum.KeyCode.D) then dir += cf.RightVector end
-                if UserInputService:IsKeyDown(Enum.KeyCode.A) then dir -= cf.RightVector end
-                if UserInputService:IsKeyDown(Enum.KeyCode.Space) then dir += Vector3.yAxis end
-                if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then dir -= Vector3.yAxis end
-                flyBV.Velocity = dir.Magnitude > 0 and dir.Unit * state.flySpeed or Vector3.zero
-                flyBG.CFrame = cf
-            end
-        end
-    end
-end))
-
-table.insert(connections, RunService.Stepped:Connect(function()
-    if state.noclip then
-        local char = getChar()
-        if char then
-            for _, part in ipairs(char:GetDescendants()) do
-                if part:IsA("BasePart") then part.CanCollide = false end
-            end
-        end
-    end
-end))
-
-table.insert(connections, UserInputService.JumpRequest:Connect(function()
-    if state.infJump then
-        local hum = getHumanoid()
-        if hum then hum:ChangeState(Enum.HumanoidStateType.Jumping) end
-    end
-end))
-
-table.insert(connections, LocalPlayer.Idled:Connect(function()
-    if state.antiAfk then
-        pcall(function()
-            VirtualUser:CaptureController()
-            VirtualUser:ClickButton2(Vector2.new())
-        end)
-    end
-end))
-
-table.insert(connections, Players.PlayerRemoving:Connect(removeEsp))
-
-task.spawn(function()
-    while _G.MonHubPanel and not _G.MonHubPanel.Dead do
-        if state.esp then pcall(refreshEsp) end
-        if state.gunEsp then pcall(refreshGun) end
-        task.wait(0.5)
-    end
-end)
-
-----------------------------------------------------------------
--- Fenêtre
-----------------------------------------------------------------
-local Window = Slate:CreateWindow({
-    Name = "MM2 Panel",
-    Subtitle = "panneau complet",
-    Icon = "zap",
-    Logo = true,
-    Size = UDim2.fromOffset(620, 430),
-    ToggleKey = Enum.KeyCode.RightShift,
-    Launcher = false,
-})
-if not Window then
-    warn("[mm2] impossible de créer la fenêtre")
-    return
-end
-pcall(function() Slate.Theme.Preset("Ash") end)
-
-local function cleanup()
-    _G.MonHubPanel.Dead = true
-    for _, c in ipairs(connections) do pcall(function() c:Disconnect() end) end
-    table.clear(connections)
-    state.fly = false
-    stopFly()
-    clearEsp()
-    clearGun()
-    setFullbright(false)
-    setNoFog(false)
-    local hum = getHumanoid()
-    if hum then
-        hum.WalkSpeed = 16
-        hum.JumpPower = 50
-    end
-    local camera = workspace.CurrentCamera
-    if camera then camera.FieldOfView = 70 end
-end
-_G.MonHubPanel.Cleanup = cleanup
-Window.Closed:Connect(cleanup)
-
-----------------------------------------------------------------
--- Onglet Mouvement
-----------------------------------------------------------------
-local tabMove = Window:CreateTab({ Name = "Mouvement", Icon = "user" })
-
-local s1 = tabMove:CreateSection({ Name = "Vitesse et saut" })
-s1:Toggle({
-    Name = "Vitesse personnalisée",
-    Callback = function(v)
-        state.speedOn = v
-        if not v then
-            local hum = getHumanoid()
-            if hum then hum.WalkSpeed = 16 end
-        end
-    end,
-})
-s1:Slider({ Name = "Vitesse", Min = 16, Max = 120, Default = 16, Step = 1,
-    Callback = function(v) state.speed = v end })
-s1:Toggle({
-    Name = "Saut personnalisé",
-    Callback = function(v)
-        state.jumpOn = v
-        if not v then
-            local hum = getHumanoid()
-            if hum then hum.JumpPower = 50 end
-        end
-    end,
-})
-s1:Slider({ Name = "Hauteur de saut", Min = 50, Max = 250, Default = 50, Step = 1,
-    Callback = function(v) state.jump = v end })
-s1:Toggle({ Name = "Saut infini", Callback = function(v) state.infJump = v end })
-
-local s2 = tabMove:CreateSection({ Name = "Vol et traversée" })
-s2:Toggle({
-    Name = "Vol (WASD, Espace, Shift)",
-    Callback = function(v)
-        state.fly = v
-        if v then startFly() else stopFly() end
-    end,
-})
-s2:Slider({ Name = "Vitesse de vol", Min = 20, Max = 200, Default = 60, Step = 5,
-    Callback = function(v) state.flySpeed = v end })
-s2:Toggle({ Name = "Noclip (traverser les murs)", Callback = function(v) state.noclip = v end })
-
-----------------------------------------------------------------
--- Onglet Visuel
-----------------------------------------------------------------
-local tabVisual = Window:CreateTab({ Name = "Visuel", Icon = "eye" })
-
-local v1 = tabVisual:CreateSection({ Name = "ESP" })
-v1:Toggle({
-    Name = "ESP joueurs (rôles en couleur)",
-    Callback = function(v)
-        state.esp = v
-        if v then pcall(refreshEsp) else clearEsp() end
-    end,
-})
-v1:Toggle({
-    Name = "Afficher les noms et rôles",
-    Default = true,
-    Callback = function(v) state.espNames = v end,
-})
-v1:Toggle({
-    Name = "ESP arme tombée",
-    Callback = function(v)
-        state.gunEsp = v
-        if v then pcall(refreshGun) else clearGun() end
-    end,
-})
-v1:Label({ Name = "Rouge = Murderer, Bleu = Sheriff, Vert = Innocent" })
-
-local v2 = tabVisual:CreateSection({ Name = "Environnement" })
-v2:Toggle({ Name = "Lumière max", Callback = function(v) state.fullbright = v setFullbright(v) end })
-v2:Toggle({ Name = "Supprimer le brouillard", Callback = function(v) state.noFog = v setNoFog(v) end })
-v2:Toggle({
-    Name = "Champ de vision personnalisé",
-    Callback = function(v)
-        state.fovOn = v
-        if not v then
-            local camera = workspace.CurrentCamera
-            if camera then camera.FieldOfView = 70 end
-        end
-    end,
-})
-v2:Slider({ Name = "FOV", Min = 50, Max = 120, Default = 70, Step = 1,
-    Callback = function(v) state.fov = v end })
-
-----------------------------------------------------------------
--- Onglet Joueurs
-----------------------------------------------------------------
-local tabPlayers = Window:CreateTab({ Name = "Joueurs", Icon = "users" })
-
-local selected
-local function playerNames()
-    local names = {}
-    for _, p in ipairs(Players:GetPlayers()) do
-        if p ~= LocalPlayer then table.insert(names, p.Name) end
-    end
-    table.sort(names)
-    return names
-end
-
-local p1 = tabPlayers:CreateSection({ Name = "Téléportation" })
-local dropdown = p1:Dropdown({
-    Name = "Joueur",
-    Options = playerNames(),
-    Placeholder = "Choisir un joueur",
-    Callback = function(v) selected = v end,
-})
-p1:Button({
-    Name = "Actualiser la liste",
-    Icon = "refresh-cw",
-    Callback = function()
-        pcall(function() dropdown:SetOptions(playerNames()) end)
-    end,
-})
-p1:Button({
-    Name = "Se téléporter au joueur",
-    Icon = "map-pin",
-    Callback = function()
-        local target = selected and Players:FindFirstChild(selected)
-        local tRoot = target and target.Character and target.Character:FindFirstChild("HumanoidRootPart")
-        local root = getRoot()
-        if tRoot and root then
-            root.CFrame = tRoot.CFrame * CFrame.new(0, 0, 3)
-        else
-            Slate:Notify({ Title = "Joueurs", Description = "Joueur introuvable.", Type = "Warning", Duration = 4 })
-        end
-    end,
-})
-
-local p2 = tabPlayers:CreateSection({ Name = "Rôles de la manche" })
-p2:Button({
-    Name = "Afficher les rôles",
-    Icon = "search",
-    Callback = function()
-        local murderer, sheriff = "inconnu", "inconnu"
-        for _, p in ipairs(Players:GetPlayers()) do
-            local role = getRole(p)
-            if role == "Murderer" then murderer = p.DisplayName end
-            if role == "Sheriff" then sheriff = p.DisplayName end
-        end
-        Slate:Notify({
-            Title = "Rôles",
-            Description = "Murderer : " .. murderer .. " | Sheriff : " .. sheriff,
-            Type = "Info",
-            Duration = 8,
-        })
-    end,
-})
-
-----------------------------------------------------------------
--- Onglet Divers
-----------------------------------------------------------------
-local tabMisc = Window:CreateTab({ Name = "Divers", Icon = "settings" })
-
-local m1 = tabMisc:CreateSection({ Name = "Utilitaires" })
-m1:Toggle({ Name = "Anti-AFK", Default = true, Callback = function(v) state.antiAfk = v end })
-m1:Button({
-    Name = "Réinitialiser le personnage",
-    Icon = "refresh-cw",
-    Callback = function()
-        local hum = getHumanoid()
-        if hum then hum.Health = 0 end
-    end,
-})
-m1:Button({
-    Name = "Rejoindre le même jeu",
-    Icon = "log-in",
-    Callback = function()
-        pcall(function() TeleportService:Teleport(game.PlaceId, LocalPlayer) end)
-    end,
-})
-m1:Button({
-    Name = "Changer de serveur",
-    Icon = "globe",
-    Callback = function()
-        local ok = pcall(function()
-            local url = "https://games.roblox.com/v1/games/" .. game.PlaceId
-                .. "/servers/Public?sortOrder=Asc&limit=100"
-            local data = HttpService:JSONDecode(game:HttpGet(url))
-            for _, server in ipairs(data.data) do
-                if server.id ~= game.JobId and server.playing < server.maxPlayers then
-                    TeleportService:TeleportToPlaceInstance(game.PlaceId, server.id, LocalPlayer)
-                    return
-                end
-            end
-            error("aucun serveur")
-        end)
-        if not ok then
-            Slate:Notify({ Title = "Serveur", Description = "Aucun autre serveur trouvé.", Type = "Warning", Duration = 5 })
-        end
-    end,
-})
-
-local m2 = tabMisc:CreateSection({ Name = "Menu" })
-m2:Button({
-    Name = "Fermer ce panneau",
-    Icon = "x",
-    Callback = function() pcall(function() Window:Destroy() end) end,
-})
-----------------------------------------------------------------
--- Onglet Shaders + Protection (anti-fling)
-----------------------------------------------------------------
-local BASE = "https://raw.githubusercontent.com/lnothingltherel/MM2hub/refs/heads/main/"
-local okSh, Shaders = pcall(function()
-    return loadstring(game:HttpGet(BASE .. "shaders.lua"), "@Shaders")()
+local noclipcoro = coroutine.wrap(function() --Noclip function
+	while true do
+		if NClip == true then
+			if game.Players ~= nil then
+				if game.Players.LocalPlayer ~= nil then
+					if game.Players.LocalPlayer.Character ~= nil then
+						if game.Players.LocalPlayer.Character:FindFirstChild("Torso") ~= nil then
+							if game.Players.LocalPlayer.Character:FindFirstChild("Head") ~= nil then
+								game.Players.LocalPlayer.Character.Torso.CanCollide = false
+								game.Players.LocalPlayer.Character.Head.CanCollide = false
+							end
+						end
+					end
+				end
+			end
+		end
+	game:service("RunService").Stepped:wait()
+	end
 end)
 
-local tabShaders = Window:CreateTab({ Name = "Shaders", Icon = "sparkles" })
-local shSec = tabShaders:CreateSection({ Name = "Ambiance visuelle" })
+noclipcoro() --For noclip to work
 
-if okSh and type(Shaders) == "table" then
-    local current = "Doux"
-    local enabled = false
+game:GetService("Players").LocalPlayer.CharacterAdded:connect(function(character) --Resets specific things for ease
+	flyvar = false
+	FlyActive.Text = "Inactive"
+	FlyActive.TextColor3 = Color3.new(1, 0, 1)
+	godmodevar = false
+	GodModeActive.Text = "Inactive"
+	GodModeActive.TextColor3 = Color3.new(1, 0, 1)
+	Clear()
+	MSESPActive.Text = "Inactive"
+	MSESPActive.TextColor3 = Color3.new(1, 0, 1)
+	PlayersEspActive.Text = "Inactive"
+	PlayersEspActive.TextColor3 = Color3.new(1, 0, 1)
+	EspOffActive.Text = "Active"
+	EspOffActive.TextColor3 = Color3.new(0, 1, 0)
+end)
 
-    shSec:Dropdown({
-        Name = "Preset",
-        Options = Shaders.Presets(),
-        Default = current,
-        Search = false,
-        Callback = function(v)
-            current = v
-            if enabled then Shaders.Apply(current) end
-        end,
-    })
-    shSec:Toggle({
-        Name = "Activer les shaders",
-        Callback = function(v)
-            enabled = v
-            if v then Shaders.Apply(current) else Shaders.Clear() end
-        end,
-    })
-    shSec:Button({
-        Name = "Retirer tous les effets",
-        Icon = "trash-2",
-        Callback = function()
-            enabled = false
-            Shaders.Clear()
-        end,
-    })
-    Window.Closed:Connect(function() pcall(Shaders.Clear) end)
-else
-    shSec:Label({ Name = "shaders.lua introuvable dans ton dépôt" })
+mouse.KeyDown:connect(function(KeyDown) --If shift is held, run
+	if KeyDown == "0" and runActive == false and keyOff == false then
+		runActive = true
+		player.Character.Humanoid.WalkSpeed = 32
+		RunActiveGui.Text = "Active"
+		RunActiveGui.TextColor3 = Color3.new(0, 1, 0)
+	end
+end)
+
+mouse.KeyUp:connect(function(KeyUp) --If shift is released, walk
+	if KeyUp == "0" and runActive == true and keyOff == false then
+		runActive = false
+		player.Character.Humanoid.WalkSpeed = 16
+		RunActiveGui.Text = "Inactive"
+		RunActiveGui.TextColor3 = Color3.new(1, 0, 1)
+	end
+end)
+
+function coingrabberfunc() --Coin grabber function
+	local children = game.Workspace:GetChildren()
+	for _, child in pairs(children) do
+  		for _, child in pairs(child:GetChildren()) do
+       		table.insert(children, child)
+  		 end
+  		 if child:IsA("BasePart") and child.Name == "Coin" then
+         	child.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
+		end
+  	end
 end
 
-local tabProtect = Window:CreateTab({ Name = "Protection", Icon = "shield" })
-local prSec = tabProtect:CreateSection({ Name = "Anti-fling" })
+function godmodefunc() --Godmode function
+	local player = game.Players.LocalPlayer
+	if player.Character then
+		if player.Character:FindFirstChild("Humanoid") then
+			player.Character.Humanoid.Name = "1"
+		end
+		local l = player.Character["1"]:Clone()
+		l.Parent = player.Character
+		l.Name = "Humanoid"; wait(0.1)
+		player.Character["1"]:Destroy()
+		workspace.CurrentCamera.CameraSubject = player.Character.Humanoid
+		player.Character.Animate.Disabled = true; wait(0.1)
+		player.Character.Animate.Disabled = false
+	end
+end
 
-local antiFling = false
+--Coin Grabber--
+Coin.Name = "CoinGrabber"
+Coin.Parent = Main
+Coin.BackgroundColor3 = Color3.new(0.188235, 0.188235, 0.188235)
+Coin.BorderColor3 = Color3.new(0, 0.607843, 1)
+Coin.BorderSizePixel = 5
+Coin.Position = UDim2.new(0, 0, 0.215, 0)
+Coin.Size = UDim2.new(1.005, 0, 0.08, 0)
+Coin.ZIndex = 4
+Coin.Font = Enum.Font.SciFi
+Coin.FontSize = Enum.FontSize.Size24
+Coin.Text = "Coin Grabber ["..string.upper(coinkey).."]"
+Coin.TextColor3 = Color3.fromRGB(255, 255, 26)
+Coin.TextSize = 20
+Coin.TextWrapped = true
+Coin.MouseButton1Down:connect(function(x, y)
+	coingrabberfunc()
+end)
 
-prSec:Toggle({
-    Name = "Anti-fling",
-    Callback = function(v) antiFling = v end,
-})
-prSec:Label({ Name = "Empêche les autres de te projeter dans les airs" })
+--Murderer/Sheriff Esp--
+MSESPActive.Name = "MSEspActive"
+MSESPActive.Parent = Main
+MSESPActive.BackgroundColor3 = Color3.new(0.188235, 0.188235, 0.188235)
+MSESPActive.BorderColor3 = Color3.new(0, 0.607843, 1)
+MSESPActive.BorderSizePixel = 5
+MSESPActive.Position = UDim2.new(0.755, 0, 0.315, 0)
+MSESPActive.Size = UDim2.new(0.25, 0, 0.08, 0)
+MSESPActive.ZIndex = 4
+MSESPActive.Font = Enum.Font.SciFi
+MSESPActive.FontSize = Enum.FontSize.Size24
+MSESPActive.Text = "Inactive"
+MSESPActive.TextColor3 = Color3.new(1, 0, 1)
+MSESPActive.TextSize = 20
+MSESPActive.TextWrapped = true
 
--- 1) les autres joueurs ne te touchent plus physiquement (chez toi)
-table.insert(connections, RunService.Stepped:Connect(function()
-    if not antiFling then return end
-    for _, player in ipairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer and player.Character then
-            for _, part in ipairs(player.Character:GetDescendants()) do
-                if part:IsA("BasePart") then part.CanCollide = false end
-            end
-        end
-    end
-end))
+MSEsp.Name = "MSEsp"
+MSEsp.Parent = Main
+MSEsp.BackgroundColor3 = Color3.new(0.188235, 0.188235, 0.188235)
+MSEsp.BorderColor3 = Color3.new(0, 0.607843, 1)
+MSEsp.BorderSizePixel = 5
+MSEsp.Position = UDim2.new(0, 0, 0.315, 0)
+MSEsp.Size = UDim2.new(0.75, 0, 0.08, 0)
+MSEsp.ZIndex = 4
+MSEsp.Font = Enum.Font.SciFi
+MSEsp.FontSize = Enum.FontSize.Size24
+MSEsp.Text = "Murderer/Sheriff Esp ["..string.upper(MSkey).."]"
+MSEsp.TextColor3 = Color3.fromRGB(255, 102, 255)
+MSEsp.TextSize = 20
+MSEsp.TextWrapped = true
+MSEsp.MouseButton1Down:connect(function(x, y)
+	murderer = "None"
+	sheriff = "None"
+	Clear()
+	findmurderer()
+	findsheriff()
+	if printvar == true then
+		print("Murderer/Sheriff")
+	end
+	MSESPActive.Text = "Active"
+	MSESPActive.TextColor3 = Color3.new(0, 1, 0)
+	PlayersEspActive.Text = "Inactive"
+	PlayersEspActive.TextColor3 = Color3.new(1, 0, 1)
+	EspOffActive.Text = "Inactive"
+	EspOffActive.TextColor3 = Color3.new(1, 0, 1)
+end)
 
--- 2) si ta vitesse devient énorme (signe d'un fling), on la remet à zéro
-table.insert(connections, RunService.Heartbeat:Connect(function()
-    if not antiFling or state.fly then return end
-    local root = getRoot()
-    if root then
-        if root.AssemblyLinearVelocity.Magnitude > 250
-            or root.AssemblyAngularVelocity.Magnitude > 100 then
-            root.AssemblyLinearVelocity = Vector3.zero
-            root.AssemblyAngularVelocity = Vector3.zero
-        end
-    end
-end))
-Slate:Notify({
-    Title = "MM2 Panel",
-    Description = "Chargé. Shift droit pour afficher ou cacher.",
-    Type = "Success",
-    Duration = 6,
-})
+--All Players Esp
+PlayersEspActive.Name = "PlayersEspActive"
+PlayersEspActive.Parent = Main
+PlayersEspActive.BackgroundColor3 = Color3.new(0.188235, 0.188235, 0.188235)
+PlayersEspActive.BorderColor3 = Color3.new(0, 0.607843, 1)
+PlayersEspActive.BorderSizePixel = 5
+PlayersEspActive.Position = UDim2.new(0.755, 0, 0.415, 0)
+PlayersEspActive.Size = UDim2.new(0.25, 0, 0.08, 0)
+PlayersEspActive.ZIndex = 4
+PlayersEspActive.Font = Enum.Font.SciFi
+PlayersEspActive.FontSize = Enum.FontSize.Size24
+PlayersEspActive.Text = "Inactive"
+PlayersEspActive.TextColor3 = Color3.new(1, 0, 1)
+PlayersEspActive.TextSize = 20
+PlayersEspActive.TextWrapped = true
+
+PlayersEsp.Name = "PlayersEsp"
+PlayersEsp.Parent = Main
+PlayersEsp.BackgroundColor3 = Color3.new(0.188235, 0.188235, 0.188235)
+PlayersEsp.BorderColor3 = Color3.new(0, 0.607843, 1)
+PlayersEsp.BorderSizePixel = 5
+PlayersEsp.Position = UDim2.new(0, 0, 0.415, 0)
+PlayersEsp.Size = UDim2.new(0.75, 0, 0.08, 0)
+PlayersEsp.ZIndex = 4
+PlayersEsp.Font = Enum.Font.SciFi
+PlayersEsp.FontSize = Enum.FontSize.Size24
+PlayersEsp.Text = "All Players Esp ["..string.upper(playerskey).."]"
+PlayersEsp.TextColor3 = Color3.fromRGB(102, 255, 51)
+PlayersEsp.TextSize = 20
+PlayersEsp.TextWrapped = true
+PlayersEsp.MouseButton1Down:connect(function(x, y)
+	Clear()
+	if printvar == true then
+		print("Players Esp")
+	end
+	MSESPActive.Text = "Inactive"
+	MSESPActive.TextColor3 = Color3.new(1, 0, 1)
+	PlayersEspActive.Text = "Active"
+	PlayersEspActive.TextColor3 = Color3.new(0, 1, 0)
+	EspOffActive.Text = "Inactive"
+	EspOffActive.TextColor3 = Color3.new(1, 0, 1)
+	findplayers()
+end)
+
+--Esp Off
+EspOffActive.Name = "EspOffActive"
+EspOffActive.Parent = Main
+EspOffActive.BackgroundColor3 = Color3.new(0.188235, 0.188235, 0.188235)
+EspOffActive.BorderColor3 = Color3.new(0, 0.607843, 1)
+EspOffActive.BorderSizePixel = 5
+EspOffActive.Position = UDim2.new(0.755, 0, 0.515, 0)
+EspOffActive.Size = UDim2.new(0.25, 0, 0.08, 0)
+EspOffActive.ZIndex = 4
+EspOffActive.Font = Enum.Font.SciFi
+EspOffActive.FontSize = Enum.FontSize.Size24
+EspOffActive.Text = "Active"
+EspOffActive.TextColor3 = Color3.new(0, 1, 0)
+EspOffActive.TextSize = 20
+EspOffActive.TextWrapped = true
+
+EspOff.Name = "EspOff"
+EspOff.Parent = Main
+EspOff.BackgroundColor3 = Color3.new(0.188235, 0.188235, 0.188235)
+EspOff.BorderColor3 = Color3.new(0, 0.607843, 1)
+EspOff.BorderSizePixel = 5
+EspOff.Position = UDim2.new(0, 0, 0.515, 0)
+EspOff.Size = UDim2.new(0.75, 0, 0.08, 0)
+EspOff.ZIndex = 4
+EspOff.Font = Enum.Font.SciFi
+EspOff.FontSize = Enum.FontSize.Size24
+EspOff.Text = "Esp Off ["..string.upper(espoffkey).."]"
+EspOff.TextColor3 = Color3.fromRGB(255, 255, 255)
+EspOff.TextSize = 20
+EspOff.TextWrapped = true
+EspOff.MouseButton1Down:connect(function(x, y)
+	Clear()
+	if printvar == true then
+		print("Esp Off")
+	end
+	MSESPActive.Text = "Inactive"
+	MSESPActive.TextColor3 = Color3.new(1, 0, 1)
+	PlayersEspActive.Text = "Inactive"
+	PlayersEspActive.TextColor3 = Color3.new(1, 0, 1)
+	EspOffActive.Text = "Active"
+	EspOffActive.TextColor3 = Color3.new(0, 1, 0)
+end)
+
+--Run
+RunActiveGui.Name = "RunActiveGui"
+RunActiveGui.Parent = Main
+RunActiveGui.BackgroundColor3 = Color3.new(0.188235, 0.188235, 0.188235)
+RunActiveGui.BorderColor3 = Color3.new(0, 0.607843, 1)
+RunActiveGui.BorderSizePixel = 5
+RunActiveGui.Position = UDim2.new(0.755, 0, 0.615, 0)
+RunActiveGui.Size = UDim2.new(0.25, 0, 0.08, 0)
+RunActiveGui.ZIndex = 4
+RunActiveGui.Font = Enum.Font.SciFi
+RunActiveGui.FontSize = Enum.FontSize.Size24
+RunActiveGui.Text = "Inactive"
+RunActiveGui.TextColor3 = Color3.new(1, 0, 1)
+RunActiveGui.TextSize = 20
+RunActiveGui.TextWrapped = true
+
+Run.Name = "Run"
+Run.Parent = Main
+Run.BackgroundColor3 = Color3.new(0.188235, 0.188235, 0.188235)
+Run.BorderColor3 = Color3.new(0, 0.607843, 1)
+Run.BorderSizePixel = 5
+Run.Position = UDim2.new(0, 0, 0.615, 0)
+Run.Size = UDim2.new(0.75, 0, 0.08, 0)
+Run.ZIndex = 4
+Run.Font = Enum.Font.SciFi
+Run.FontSize = Enum.FontSize.Size24
+Run.Text = "Run [Shift]"
+Run.TextColor3 = Color3.fromRGB(255, 51, 0)
+Run.TextSize = 20
+Run.TextWrapped = true
+Run.MouseButton1Down:connect(function(x, y)
+	if runActive == false then
+		runActive = true
+		player.Character.Humanoid.WalkSpeed = 32
+		RunActiveGui.Text = "Active"
+		RunActiveGui.TextColor3 = Color3.new(0, 1, 0)
+	elseif runActive == true then
+		runActive = false
+		player.Character.Humanoid.WalkSpeed = 16
+		RunActiveGui.Text = "Inactive"
+		RunActiveGui.TextColor3 = Color3.new(1, 0, 1)
+	end
+end)
+
+--Fly
+FlyActive.Name = "FlyActive"
+FlyActive.Parent = Main
+FlyActive.BackgroundColor3 = Color3.new(0.188235, 0.188235, 0.188235)
+FlyActive.BorderColor3 = Color3.new(0, 0.607843, 1)
+FlyActive.BorderSizePixel = 5
+FlyActive.Position = UDim2.new(0.755, 0, 0.715, 0)
+FlyActive.Size = UDim2.new(0.25, 0, 0.08, 0)
+FlyActive.ZIndex = 4
+FlyActive.Font = Enum.Font.SciFi
+FlyActive.FontSize = Enum.FontSize.Size24
+FlyActive.Text = "Inactive"
+FlyActive.TextColor3 = Color3.new(1, 0, 1)
+FlyActive.TextSize = 20
+FlyActive.TextWrapped = true
+
+Fly.Name = "Fly"
+Fly.Parent = Main
+Fly.BackgroundColor3 = Color3.new(0.188235, 0.188235, 0.188235)
+Fly.BorderColor3 = Color3.new(0, 0.607843, 1)
+Fly.BorderSizePixel = 5
+Fly.Position = UDim2.new(0, 0, 0.715, 0)
+Fly.Size = UDim2.new(0.75, 0, 0.08, 0)
+Fly.ZIndex = 4
+Fly.Font = Enum.Font.SciFi
+Fly.FontSize = Enum.FontSize.Size24
+Fly.Text = "Fly ["..string.upper(flykey).."]"
+Fly.TextColor3 = Color3.fromRGB(204, 255, 255)
+Fly.TextSize = 20
+Fly.TextWrapped = true
+Fly.MouseButton1Down:connect(function(x, y)
+	if flyvar == false then
+		sFLY()
+		flyvar = true
+		FlyActive.Text = "Active"
+		FlyActive.TextColor3 = Color3.new(0, 1, 0)
+	elseif flyvar == true then
+		flyvar = false
+		NOFLY()
+		FlyActive.Text = "Inactive"
+		FlyActive.TextColor3 = Color3.new(1, 0, 1)
+	end
+end)
+
+--Noclip
+NoclipActive.Name = "NoclipActive"
+NoclipActive.Parent = Main
+NoclipActive.BackgroundColor3 = Color3.new(0.188235, 0.188235, 0.188235)
+NoclipActive.BorderColor3 = Color3.new(0, 0.607843, 1)
+NoclipActive.BorderSizePixel = 5
+NoclipActive.Position = UDim2.new(0.755, 0, 0.815, 0)
+NoclipActive.Size = UDim2.new(0.25, 0, 0.08, 0)
+NoclipActive.ZIndex = 4
+NoclipActive.Font = Enum.Font.SciFi
+NoclipActive.FontSize = Enum.FontSize.Size24
+NoclipActive.Text = "Inactive"
+NoclipActive.TextColor3 = Color3.new(1, 0, 1)
+NoclipActive.TextSize = 20
+NoclipActive.TextWrapped = true
+
+Noclip.Name = "Noclip"
+Noclip.Parent = Main
+Noclip.BackgroundColor3 = Color3.new(0.188235, 0.188235, 0.188235)
+Noclip.BorderColor3 = Color3.new(0, 0.607843, 1)
+Noclip.BorderSizePixel = 5
+Noclip.Position = UDim2.new(0, 0, 0.815, 0)
+Noclip.Size = UDim2.new(0.75, 0, 0.08, 0)
+Noclip.ZIndex = 4
+Noclip.Font = Enum.Font.SciFi
+Noclip.FontSize = Enum.FontSize.Size24
+Noclip.Text = "Noclip ["..string.upper(noclipkey).."]"
+Noclip.TextColor3 = Color3.fromRGB(0, 102, 255)
+Noclip.TextSize = 20
+Noclip.TextWrapped = true
+Noclip.MouseButton1Down:connect(function(x, y)
+	if NClip == false then
+		NClip = true
+		if printvar == true then
+			print("Noclip Enabled")
+		end
+		NoclipActive.Text = "Active"
+		NoclipActive.TextColor3 = Color3.new(0, 1, 0)
+	elseif NClip == true then
+		NClip = false
+		if printvar == true then
+			print("Noclip Disabled")
+		end
+		NoclipActive.Text = "Inactive"
+		NoclipActive.TextColor3 = Color3.new(1, 0, 1)
+	end
+end)
+
+--GodMode
+GodModeActive.Name = "GodModeActive"
+GodModeActive.Parent = Main
+GodModeActive.BackgroundColor3 = Color3.new(0.188235, 0.188235, 0.188235)
+GodModeActive.BorderColor3 = Color3.new(0, 0.607843, 1)
+GodModeActive.BorderSizePixel = 5
+GodModeActive.Position = UDim2.new(0.755, 0, 0.915, 0)
+GodModeActive.Size = UDim2.new(0.25, 0, 0.08, 0)
+GodModeActive.ZIndex = 4
+GodModeActive.Font = Enum.Font.SciFi
+GodModeActive.FontSize = Enum.FontSize.Size24
+GodModeActive.Text = "Inactive"
+GodModeActive.TextColor3 = Color3.new(1, 0, 1)
+GodModeActive.TextSize = 20
+GodModeActive.TextWrapped = true
+
+GodMode.Name = "GodMode"
+GodMode.Parent = Main
+GodMode.BackgroundColor3 = Color3.new(0.188235, 0.188235, 0.188235)
+GodMode.BorderColor3 = Color3.new(0, 0.607843, 1)
+GodMode.BorderSizePixel = 5
+GodMode.Position = UDim2.new(0, 0, 0.915, 0)
+GodMode.Size = UDim2.new(0.75, 0, 0.08, 0)
+GodMode.ZIndex = 4
+GodMode.Font = Enum.Font.SciFi
+GodMode.FontSize = Enum.FontSize.Size24
+GodMode.Text = "God Mode ["..string.upper(godmodekey).."]"
+GodMode.TextColor3 = Color3.fromRGB(255, 255, 255)
+GodMode.TextSize = 20
+GodMode.TextWrapped = true
+GodMode.MouseButton1Down:connect(function(x, y)
+	if godmodevar == false then
+		GodModeActive.Text = "Active"
+		GodModeActive.TextColor3 = Color3.new(0, 1, 0)
+		godmodevar = true
+		godmodefunc()
+	end
+end)
+
+--Xray On
+GuiXrayOnActive.Name = "GuiXrayOnActive"
+GuiXrayOnActive.Parent = Main
+GuiXrayOnActive.BackgroundColor3 = Color3.new(0.188235, 0.188235, 0.188235)
+GuiXrayOnActive.BorderColor3 = Color3.new(0, 0.607843, 1)
+GuiXrayOnActive.BorderSizePixel = 5
+GuiXrayOnActive.Position = UDim2.new(0.755, 0, 1.015, 0)
+GuiXrayOnActive.Size = UDim2.new(0.25, 0, 0.08, 0)
+GuiXrayOnActive.ZIndex = 4
+GuiXrayOnActive.Font = Enum.Font.SciFi
+GuiXrayOnActive.FontSize = Enum.FontSize.Size24
+GuiXrayOnActive.Text = "Inactive"
+GuiXrayOnActive.TextColor3 = Color3.new(1, 0, 1)
+GuiXrayOnActive.TextSize = 20
+GuiXrayOnActive.TextWrapped = true
+
+GuiXrayOn.Name = "XrayOn"
+GuiXrayOn.Parent = Main
+GuiXrayOn.BackgroundColor3 = Color3.new(0.188235, 0.188235, 0.188235)
+GuiXrayOn.BorderColor3 = Color3.new(0, 0.607843, 1)
+GuiXrayOn.BorderSizePixel = 5
+GuiXrayOn.Position = UDim2.new(0, 0, 1.015, 0)
+GuiXrayOn.Size = UDim2.new(0.75, 0, 0.08, 0)
+GuiXrayOn.ZIndex = 4
+GuiXrayOn.Font = Enum.Font.SciFi
+GuiXrayOn.FontSize = Enum.FontSize.Size24
+GuiXrayOn.Text = "Xray On ["..string.upper(xrayonkey).."]"
+GuiXrayOn.TextColor3 = Color3.fromRGB(255, 204, 102)
+GuiXrayOn.TextSize = 20
+GuiXrayOn.TextWrapped = true
+GuiXrayOn.MouseButton1Down:connect(function(x, y)
+	GuiXrayOnActive.Text = "Active"
+	GuiXrayOnActive.TextColor3 = Color3.new(0, 1, 0)
+	GuiXrayOffActive.Text = "Inactive"
+	GuiXrayOffActive.TextColor3 = Color3.new(1, 0, 1)
+	XrayOn(obj)
+end)
+
+--Xray Off
+GuiXrayOffActive.Name = "GuiXrayOffActive"
+GuiXrayOffActive.Parent = Main
+GuiXrayOffActive.BackgroundColor3 = Color3.new(0.188235, 0.188235, 0.188235)
+GuiXrayOffActive.BorderColor3 = Color3.new(0, 0.607843, 1)
+GuiXrayOffActive.BorderSizePixel = 5
+GuiXrayOffActive.Position = UDim2.new(0.755, 0, 1.115, 0)
+GuiXrayOffActive.Size = UDim2.new(0.25, 0, 0.08, 0)
+GuiXrayOffActive.ZIndex = 4
+GuiXrayOffActive.Font = Enum.Font.SciFi
+GuiXrayOffActive.FontSize = Enum.FontSize.Size24
+GuiXrayOffActive.Text = "Active"
+GuiXrayOffActive.TextColor3 = Color3.new(0, 1, 0)
+GuiXrayOffActive.TextSize = 20
+GuiXrayOffActive.TextWrapped = true
+
+GuiXrayOff.Name = "XrayOff"
+GuiXrayOff.Parent = Main
+GuiXrayOff.BackgroundColor3 = Color3.new(0.188235, 0.188235, 0.188235)
+GuiXrayOff.BorderColor3 = Color3.new(0, 0.607843, 1)
+GuiXrayOff.BorderSizePixel = 5
+GuiXrayOff.Position = UDim2.new(0, 0, 1.115, 0)
+GuiXrayOff.Size = UDim2.new(0.75, 0, 0.08, 0)
+GuiXrayOff.ZIndex = 4
+GuiXrayOff.Font = Enum.Font.SciFi
+GuiXrayOff.FontSize = Enum.FontSize.Size24
+GuiXrayOff.Text = "Xray Off ["..string.upper(xrayoffkey).."]"
+GuiXrayOff.TextColor3 = Color3.fromRGB(255, 153, 51)
+GuiXrayOff.TextSize = 20
+GuiXrayOff.TextWrapped = true
+GuiXrayOff.MouseButton1Down:connect(function(x, y)
+	GuiXrayOnActive.Text = "Inactive"
+	GuiXrayOnActive.TextColor3 = Color3.new(1, 0, 1)
+	GuiXrayOffActive.Text = "Active"
+	GuiXrayOffActive.TextColor3 = Color3.new(0, 1, 0)
+	XrayOff(obj)
+end)
+
+--Bring Gun to You
+BringGun.Name = "BringGun"
+BringGun.Parent = Main
+BringGun.BackgroundColor3 = Color3.new(0.188235, 0.188235, 0.188235)
+BringGun.BorderColor3 = Color3.new(0, 0.607843, 1)
+BringGun.BorderSizePixel = 5
+BringGun.Position = UDim2.new(0, 0, 1.215, 0)
+BringGun.Size = UDim2.new(1.005, 0, 0.08, 0)
+BringGun.ZIndex = 4
+BringGun.Font = Enum.Font.SciFi
+BringGun.FontSize = Enum.FontSize.Size24
+BringGun.Text = "Teleport Gun ["..string.upper(bringgunkey).."]"
+BringGun.TextColor3 = Color3.fromRGB(0, 255, 0)
+BringGun.TextSize = 20
+BringGun.TextWrapped = true
+BringGun.MouseButton1Down:connect(function(x, y)
+	if game.Workspace.GunDrop.CFrame ~= nil then
+		game.Workspace.GunDrop.CFrame = game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame
+	else
+		if printvar == true then
+			print("Gun not currently dropped")
+		end
+	end
+end)
+
+--Keybinds
+KeybindsActive.Name = "KeybindsActive"
+KeybindsActive.Parent = Main
+KeybindsActive.BackgroundColor3 = Color3.new(0.188235, 0.188235, 0.188235)
+KeybindsActive.BorderColor3 = Color3.new(0, 0.607843, 1)
+KeybindsActive.BorderSizePixel = 5
+KeybindsActive.Position = UDim2.new(0.755, 0, 1.315, 0)
+KeybindsActive.Size = UDim2.new(0.25, 0, 0.08, 0)
+KeybindsActive.ZIndex = 4
+KeybindsActive.Font = Enum.Font.SciFi
+KeybindsActive.FontSize = Enum.FontSize.Size24
+KeybindsActive.Text = "Active"
+KeybindsActive.TextColor3 = Color3.new(0, 1, 0)
+KeybindsActive.TextSize = 20
+KeybindsActive.TextWrapped = true
+
+Keybinds.Name = "Keybinds"
+Keybinds.Parent = Main
+Keybinds.BackgroundColor3 = Color3.new(0.188235, 0.188235, 0.188235)
+Keybinds.BorderColor3 = Color3.new(0, 0.607843, 1)
+Keybinds.BorderSizePixel = 5
+Keybinds.Position = UDim2.new(0, 0, 1.315, 0)
+Keybinds.Size = UDim2.new(0.75, 0, 0.08, 0)
+Keybinds.ZIndex = 4
+Keybinds.Font = Enum.Font.SciFi
+Keybinds.FontSize = Enum.FontSize.Size24
+Keybinds.Text = "Keybinds [Ctrl]"
+Keybinds.TextColor3 = Color3.fromRGB(255, 255, 255)
+Keybinds.TextSize = 20
+Keybinds.TextWrapped = true
+Keybinds.MouseButton1Down:connect(function(x, y)
+	if keyOff == true then
+		keyOff = false
+		KeybindsActive.Text = "Active"
+		KeybindsActive.TextColor3 = Color3.new(0, 1, 0)
+	elseif keyOff == false then
+		keyOff = true
+		KeybindsActive.Text = "Inactive"
+		KeybindsActive.TextColor3 = Color3.new(1, 0, 1)
+	end
+end)
+
+Show.Name = "Show"
+Show.Parent = MM2
+Show.BackgroundColor3 = Color3.new(0.188235, 0.188235, 0.188235)
+Show.BorderColor3 = Color3.new(0, 0.607843, 1)
+Show.BorderSizePixel = 5
+Show.Position = UDim2.new(0, 0, 0.85799998, 0)
+Show.Size = UDim2.new(0.08, 0, 0.04, 0)
+Show.ZIndex = 4
+Show.Font = Enum.Font.SciFi
+Show.FontSize = Enum.FontSize.Size24
+Show.Text = "Show ["..string.upper(hideshowguikey).."]"
+Show.TextColor3 = Color3.new(0, 0.333333, 1)
+Show.TextSize = 20
+Show.TextWrapped = true
+Show.Visible = false
+
+Hide.Name = "Hide"
+Hide.Parent = Main
+Hide.BackgroundColor3 = Color3.new(0.188235, 0.188235, 0.188235)
+Hide.BorderColor3 = Color3.new(0, 0.607843, 1)
+Hide.BorderSizePixel = 5
+Hide.Position = UDim2.new(0, 0, 1.415, 0)
+Hide.Size = UDim2.new(1.005, 0, 0.08, 0)
+Hide.ZIndex = 4
+Hide.Font = Enum.Font.SciFi
+Hide.FontSize = Enum.FontSize.Size24
+Hide.Text = "Hide ["..string.upper(hideshowguikey).."]"
+Hide.TextColor3 = Color3.new(0, 0.333333, 1)
+Hide.TextSize = 20
+Hide.TextWrapped = true
+
+Hide.MouseButton1Down:connect(function(x, y)
+	if showvar == true then
+		showvar = false
+		Main.Visible = false
+		Show.Visible = true
+		if printvar == true then
+			print("Hidden")
+		end
+	end
+end)
+
+Show.MouseButton1Down:connect(function(x, y)
+	if showvar == false then
+		showvar = true
+		Show.Visible = false
+		Main.Visible = true
+		if printvar == true then
+			print("Shown")
+		end
+	end
+end)
+
+inputcode.InputBegan:connect(function(input)
+	if input.KeyCode == Enum.KeyCode.LeftControl then
+		if keyOff == true then
+			keyOff = false
+			KeybindsActive.Text = "Active"
+			KeybindsActive.TextColor3 = Color3.new(0, 1, 0)
+		elseif keyOff == false then
+			keyOff = true
+			KeybindsActive.Text = "Inactive"
+			KeybindsActive.TextColor3 = Color3.new(1, 0, 1)
+		end
+	end
+end)
+
+mouse.keyDown:connect(function(key)
+	if keyOff == false then
+		if key == coinkey then --Coin Grabber
+			coingrabberfunc()
+		elseif key == MSkey then --Murderer/Sheriff Esp On
+			murderer = "None"
+			sheriff = "None"
+			Clear()
+			findmurderer()
+			findsheriff()
+			if printvar == true then
+				print("Murderer/Sheriff")
+			end
+			MSESPActive.Text = "Active"
+			MSESPActive.TextColor3 = Color3.new(0, 1, 0)
+			PlayersEspActive.Text = "Inactive"
+			PlayersEspActive.TextColor3 = Color3.new(1, 0, 1)
+			EspOffActive.Text = "Inactive"
+			EspOffActive.TextColor3 = Color3.new(1, 0, 1)
+		elseif key == playerskey then --Player Esp On
+			Clear()
+			MSESPActive.Text = "Inactive"
+			MSESPActive.TextColor3 = Color3.new(1, 0, 1)
+			PlayersEspActive.Text = "Active"
+			PlayersEspActive.TextColor3 = Color3.new(0, 1, 0)
+			EspOffActive.Text = "Inactive"
+			EspOffActive.TextColor3 = Color3.new(1, 0, 1)
+			findplayers()
+			if printvar == true then
+				print("Players")
+			end
+		elseif key == espoffkey then --Esp off
+			Clear()
+			if printvar == true then
+				print("Esp Disabled")
+			end
+			MSESPActive.Text = "Inactive"
+			MSESPActive.TextColor3 = Color3.new(1, 0, 1)
+			PlayersEspActive.Text = "Inactive"
+			PlayersEspActive.TextColor3 = Color3.new(1, 0, 1)
+			EspOffActive.Text = "Active"
+			EspOffActive.TextColor3 = Color3.new(0, 1, 0)
+		elseif key == flykey then --Fly
+			if flyvar == false then
+				sFLY()
+				flyvar = true
+				FlyActive.Text = "Active"
+				FlyActive.TextColor3 = Color3.new(0, 1, 0)
+			elseif flyvar == true then
+				flyvar = false
+				NOFLY()
+				FlyActive.Text = "Inactive"
+				FlyActive.TextColor3 = Color3.new(1, 0, 1)
+			end
+		elseif key == noclipkey then --Noclip toggle
+			if NClip == false then
+				NClip = true
+				if printvar == true then
+					print("Noclip Enabled")
+				end
+				NoclipActive.Text = "Active"
+				NoclipActive.TextColor3 = Color3.new(0, 1, 0)
+			elseif NClip == true then
+				NClip = false
+				if printvar == true then
+					print("Noclip Disabled")
+				end
+				NoclipActive.Text = "Inactive"
+				NoclipActive.TextColor3 = Color3.new(1, 0, 1)
+			end
+		elseif key == godmodekey then --Godmode
+			if godmodevar == false then
+				godmodevar = true
+				godmodefunc()
+				GodModeActive.Text = "Active"
+				GodModeActive.TextColor3 = Color3.new(0, 1, 0)
+			end
+		elseif key == xrayonkey then --Xray On
+			GuiXrayOnActive.Text = "Active"
+			GuiXrayOnActive.TextColor3 = Color3.new(0, 1, 0)
+			GuiXrayOffActive.Text = "Inactive"
+			GuiXrayOffActive.TextColor3 = Color3.new(1, 0, 1)
+			XrayOn(obj)
+		elseif key == xrayoffkey then --Xray Off
+			GuiXrayOnActive.Text = "Inactive"
+			GuiXrayOnActive.TextColor3 = Color3.new(1, 0, 1)
+			GuiXrayOffActive.Text = "Active"
+			GuiXrayOffActive.TextColor3 = Color3.new(0, 1, 0)
+			XrayOff(obj)
+		elseif key == bringgunkey then --Teleport Gun to You
+			if game.Workspace.GunDrop.CFrame ~= nil then
+				game.Workspace.GunDrop.CFrame = game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.CFrame
+			else
+				if printvar == true then
+					print("Gun not currently dropped")
+				end
+			end
+		elseif key == hideshowguikey then --Show/Hide Gui
+			if showvar == false then
+				showvar = true
+				Show.Visible = false
+				Main.Visible = true
+				if printvar == true then
+					print("Shown")
+				end
+			elseif showvar == true then
+				showvar = false
+				Main.Visible = false
+				Show.Visible = true
+				if printvar == true then
+					print("Hidden")
+				end
+			end
+		end
+	end
+end)
+end
