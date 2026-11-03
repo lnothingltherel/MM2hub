@@ -1,4 +1,4 @@
--- mm2.lua : panneau d'options (tout vient de mon dépôt)
+-- mm2.lua : panneau MM2 complet (tout vient de mon dépôt)
 print("[mm2] chargé")
 
 local SLATE_URL = "https://raw.githubusercontent.com/lnothingltherel/MM2hub/refs/heads/main/slate.lua"
@@ -7,6 +7,9 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local Lighting = game:GetService("Lighting")
+local TeleportService = game:GetService("TeleportService")
+local VirtualUser = game:GetService("VirtualUser")
+local HttpService = game:GetService("HttpService")
 local LocalPlayer = Players.LocalPlayer
 
 -- Ferme l'ancien panneau s'il existe
@@ -15,7 +18,6 @@ if type(_G.MonHubPanel) == "table" and _G.MonHubPanel.Cleanup then
 end
 _G.MonHubPanel = {}
 
--- Chargement de Slate (sans Cleanup, pour ne pas fermer le hub)
 local okSlate, Slate = pcall(function()
     return loadstring(game:HttpGet(SLATE_URL), "@Slate")()
 end)
@@ -25,228 +27,173 @@ if not okSlate or type(Slate) ~= "table" then
 end
 pcall(function() Slate:PreloadIcons({ "lucide" }) end)
 
--- Réglages
+----------------------------------------------------------------
+-- État
+----------------------------------------------------------------
 local state = {
     speedOn = false, speed = 16,
     jumpOn = false, jump = 50,
     infJump = false,
-    esp = false,
+    noclip = false,
+    fly = false, flySpeed = 60,
+    esp = false, espNames = true,
+    gunEsp = false,
     fullbright = false,
-    fov = 70,
+    noFog = false,
+    fov = 70, fovOn = false,
+    antiAfk = true,
 }
 
 local connections = {}
-local highlights = {}
+local espObjects = {}
+local gunHighlight
+local flyBV, flyBG
+
 local oldLighting = {
     Brightness = Lighting.Brightness,
     ClockTime = Lighting.ClockTime,
     GlobalShadows = Lighting.GlobalShadows,
     Ambient = Lighting.Ambient,
+    FogEnd = Lighting.FogEnd,
 }
 
+local function getChar() return LocalPlayer.Character end
 local function getHumanoid()
-    local char = LocalPlayer.Character
-    return char and char:FindFirstChildOfClass("Humanoid")
+    local c = getChar()
+    return c and c:FindFirstChildOfClass("Humanoid")
+end
+local function getRoot()
+    local c = getChar()
+    return c and c:FindFirstChild("HumanoidRootPart")
 end
 
--- Vitesse / saut appliqués en continu
-table.insert(connections, RunService.Heartbeat:Connect(function()
-    local hum = getHumanoid()
-    if hum then
-        if state.speedOn then
-            hum.WalkSpeed = state.speed
-        end
-        if state.jumpOn then
-            hum.UseJumpPower = true
-            hum.JumpPower = state.jump
-        end
-    end
-    local camera = workspace.CurrentCamera
-    if camera then
-        camera.FieldOfView = state.fov
-    end
-end))
+----------------------------------------------------------------
+-- Rôles MM2 (visibles une fois la manche lancée)
+----------------------------------------------------------------
+local function hasTool(player, name)
+    if player.Character and player.Character:FindFirstChild(name) then return true end
+    if player.Backpack and player.Backpack:FindFirstChild(name) then return true end
+    return false
+end
 
--- Saut infini
-table.insert(connections, UserInputService.JumpRequest:Connect(function()
-    if state.infJump then
-        local hum = getHumanoid()
-        if hum then
-            hum:ChangeState(Enum.HumanoidStateType.Jumping)
-        end
-    end
-end))
+local function getRole(player)
+    if hasTool(player, "Knife") then return "Murderer" end
+    if hasTool(player, "Gun") then return "Sheriff" end
+    return "Innocent"
+end
 
--- ESP : contour autour des autres joueurs
+local ROLE_COLORS = {
+    Murderer = Color3.fromRGB(255, 60, 60),
+    Sheriff = Color3.fromRGB(70, 140, 255),
+    Innocent = Color3.fromRGB(80, 220, 120),
+}
+
+----------------------------------------------------------------
+-- ESP joueurs
+----------------------------------------------------------------
+local function removeEsp(player)
+    local entry = espObjects[player]
+    if entry then
+        pcall(function() entry.hl:Destroy() end)
+        pcall(function() entry.gui:Destroy() end)
+        espObjects[player] = nil
+    end
+end
+
 local function clearEsp()
-    for _, item in pairs(highlights) do
-        pcall(function() item:Destroy() end)
+    for player in pairs(espObjects) do
+        removeEsp(player)
     end
-    table.clear(highlights)
 end
 
 local function refreshEsp()
-    for player, item in pairs(highlights) do
-        if not player.Parent or not player.Character or item.Parent ~= player.Character then
-            pcall(function() item:Destroy() end)
-            highlights[player] = nil
+    for player, entry in pairs(espObjects) do
+        if not player.Parent or not player.Character or entry.hl.Parent ~= player.Character then
+            removeEsp(player)
         end
     end
     for _, player in ipairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer and player.Character and not highlights[player] then
-            local item = Instance.new("Highlight")
-            item.FillColor = Color3.fromRGB(255, 255, 255)
-            item.FillTransparency = 0.6
-            item.OutlineColor = Color3.fromRGB(255, 255, 255)
-            item.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-            item.Parent = player.Character
-            highlights[player] = item
+        local char = player.Character
+        local head = char and char:FindFirstChild("Head")
+        if player ~= LocalPlayer and char and head then
+            local entry = espObjects[player]
+            if not entry then
+                local hl = Instance.new("Highlight")
+                hl.FillTransparency = 0.55
+                hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+                hl.Parent = char
+
+                local gui = Instance.new("BillboardGui")
+                gui.Size = UDim2.fromOffset(140, 20)
+                gui.StudsOffset = Vector3.new(0, 2.6, 0)
+                gui.AlwaysOnTop = true
+                gui.Adornee = head
+                gui.Parent = head
+
+                local label = Instance.new("TextLabel")
+                label.BackgroundTransparency = 1
+                label.Size = UDim2.fromScale(1, 1)
+                label.Font = Enum.Font.GothamBold
+                label.TextSize = 13
+                label.TextStrokeTransparency = 0.4
+                label.Parent = gui
+
+                entry = { hl = hl, gui = gui, label = label }
+                espObjects[player] = entry
+            end
+            local role = getRole(player)
+            local color = ROLE_COLORS[role]
+            entry.hl.FillColor = color
+            entry.hl.OutlineColor = color
+            entry.label.TextColor3 = color
+            entry.label.Text = player.DisplayName .. " [" .. role .. "]"
+            entry.gui.Enabled = state.espNames
         end
     end
 end
 
-task.spawn(function()
-    while _G.MonHubPanel and not _G.MonHubPanel.Dead do
-        if state.esp then
-            pcall(refreshEsp)
-        end
-        task.wait(1)
-    end
-end)
-
--- Lumière max
-local function setFullbright(on)
-    if on then
-        Lighting.Brightness = 2
-        Lighting.ClockTime = 14
-        Lighting.GlobalShadows = false
-        Lighting.Ambient = Color3.fromRGB(180, 180, 180)
-    else
-        Lighting.Brightness = oldLighting.Brightness
-        Lighting.ClockTime = oldLighting.ClockTime
-        Lighting.GlobalShadows = oldLighting.GlobalShadows
-        Lighting.Ambient = oldLighting.Ambient
+----------------------------------------------------------------
+-- ESP arme tombée
+----------------------------------------------------------------
+local function refreshGun()
+    local drop = workspace:FindFirstChild("GunDrop", true)
+    if drop and (not gunHighlight or gunHighlight.Parent ~= drop) then
+        if gunHighlight then pcall(function() gunHighlight:Destroy() end) end
+        gunHighlight = Instance.new("Highlight")
+        gunHighlight.FillColor = Color3.fromRGB(255, 220, 60)
+        gunHighlight.OutlineColor = Color3.fromRGB(255, 220, 60)
+        gunHighlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+        gunHighlight.Parent = drop
+    elseif not drop and gunHighlight then
+        pcall(function() gunHighlight:Destroy() end)
+        gunHighlight = nil
     end
 end
 
--- Fenêtre
-local Window = Slate:CreateWindow({
-    Name = "MM2 Panel",
-    Subtitle = "options",
-    Icon = "zap",
-    Logo = true,
-    Size = UDim2.fromOffset(560, 400),
-    ToggleKey = Enum.KeyCode.RightShift,
-    Launcher = false,
-})
-if not Window then
-    warn("[mm2] impossible de créer la fenêtre")
-    return
+local function clearGun()
+    if gunHighlight then
+        pcall(function() gunHighlight:Destroy() end)
+        gunHighlight = nil
+    end
 end
 
-pcall(function() Slate.Theme.Preset("Ash") end)
-
-local function cleanup()
-    _G.MonHubPanel.Dead = true
-    for _, c in ipairs(connections) do
-        pcall(function() c:Disconnect() end)
-    end
-    table.clear(connections)
-    clearEsp()
-    setFullbright(false)
+----------------------------------------------------------------
+-- Vol
+----------------------------------------------------------------
+local function stopFly()
+    if flyBV then pcall(function() flyBV:Destroy() end) flyBV = nil end
+    if flyBG then pcall(function() flyBG:Destroy() end) flyBG = nil end
     local hum = getHumanoid()
-    if hum then
-        hum.WalkSpeed = 16
-        hum.JumpPower = 50
-    end
-    local camera = workspace.CurrentCamera
-    if camera then
-        camera.FieldOfView = 70
-    end
+    if hum then hum.PlatformStand = false end
 end
-_G.MonHubPanel.Cleanup = cleanup
-Window.Closed:Connect(cleanup)
 
-local Tab = Window:CreateTab({ Name = "Joueur", Icon = "user" })
-
-local move = Tab:CreateSection({ Name = "Mouvement" })
-move:Toggle({
-    Name = "Vitesse personnalisée",
-    Default = false,
-    Callback = function(value)
-        state.speedOn = value
-        if not value then
-            local hum = getHumanoid()
-            if hum then hum.WalkSpeed = 16 end
-        end
-    end,
-})
-move:Slider({
-    Name = "Vitesse",
-    Min = 16, Max = 100, Default = 16, Step = 1,
-    Callback = function(value) state.speed = value end,
-})
-move:Toggle({
-    Name = "Saut personnalisé",
-    Default = false,
-    Callback = function(value)
-        state.jumpOn = value
-        if not value then
-            local hum = getHumanoid()
-            if hum then hum.JumpPower = 50 end
-        end
-    end,
-})
-move:Slider({
-    Name = "Hauteur de saut",
-    Min = 50, Max = 200, Default = 50, Step = 1,
-    Callback = function(value) state.jump = value end,
-})
-move:Toggle({
-    Name = "Saut infini",
-    Default = false,
-    Callback = function(value) state.infJump = value end,
-})
-
-local visual = Tab:CreateSection({ Name = "Visuel" })
-visual:Toggle({
-    Name = "Contour des joueurs",
-    Default = false,
-    Callback = function(value)
-        state.esp = value
-        if value then
-            pcall(refreshEsp)
-        else
-            clearEsp()
-        end
-    end,
-})
-visual:Toggle({
-    Name = "Lumière max",
-    Default = false,
-    Callback = function(value)
-        state.fullbright = value
-        setFullbright(value)
-    end,
-})
-visual:Slider({
-    Name = "Champ de vision (FOV)",
-    Min = 50, Max = 120, Default = 70, Step = 1,
-    Callback = function(value) state.fov = value end,
-})
-
-local menu = Tab:CreateSection({ Name = "Menu" })
-menu:Button({
-    Name = "Fermer ce panneau",
-    Icon = "x",
-    Callback = function()
-        pcall(function() Window:Destroy() end)
-    end,
-})
-
-Slate:Notify({
-    Title = "MM2 Panel",
-    Description = "Panneau chargé. Touche Shift droit pour l'afficher ou le cacher.",
-    Type = "Success",
-    Duration = 6,
-})
+local function startFly()
+    local root, hum = getRoot(), getHumanoid()
+    if not root or not hum then return end
+    stopFly()
+    flyBV = Instance.new("BodyVelocity")
+    flyBV.MaxForce = Vector3.new(1e9, 1e9, 1e9)
+    flyBV.Velocity = Vector3.zero
+    flyBV.Parent = root
+    flyBG = Instance.new("BodyGyro")
+    flyBG.MaxTorque =
